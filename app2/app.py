@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import logging
 import os
 from transformers import pipeline, AutoTokenizer
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 from pyngrok import ngrok
 import os
@@ -15,7 +16,7 @@ authtoken = "31hYhuo5WYgo57T6dH7N716k1EE_2BJYnoWToy9mA9PB3MxcP"
     # Create a AuthToken and assign the python variable authtoken above to this value.
 ngrok.set_auth_token(authtoken)
 public_url = ngrok.connect(web_port)
-print("Public URL:", public_url)
+print("--------------------> Public URL:", public_url)
 
 
 # Disable symlinks warning and set cache directory
@@ -30,6 +31,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+save_model_name = '/workspaces/MLOps/app2/saved_model'
 
 # Global variables
 translator = None
@@ -46,6 +49,22 @@ try:
         device=-1  # Force CPU
     )
     logger.info("Translation pipeline loaded successfully!")
+
+
+    logger.info("Saving the model")
+    os.system(f'ls -al /workspaces/MLOps/app2/')
+    translator.save_pretrained(save_model_name)
+    os.system(f'ls -al /workspaces/MLOps/app2/')
+    os.system(f'ls -al {save_model_name}')
+
+    translator = ''
+
+    logger.info("Loading the model")
+    tokenizer = T5Tokenizer.from_pretrained(save_model_name)
+    model = T5ForConditionalGeneration.from_pretrained(save_model_name)
+    translator = pipeline("translation_en_to_de", model=model, tokenizer=tokenizer)
+    logger.info("Done loading the model")
+
 
 except Exception as e:
     logger.error(f"Error during initialization: {str(e)}", exc_info=True)
