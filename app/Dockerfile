@@ -13,7 +13,7 @@ RUN curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
   && apt update \
   && apt install ngrok
 
-COPY ./app /code/app
+COPY . /code/app
 
 ENV WEB_PORT=8000
 
