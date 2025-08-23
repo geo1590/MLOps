@@ -1,0 +1,7 @@
+English to German
+	https://huggingface.co/spaces/adlamtawea/space-for-flask-app/tree/main
+
+
+docker build -t image_name .
+docker run --name container_name -p 7860:7860 image_name
+
