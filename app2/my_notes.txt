@@ -2,10 +2,19 @@ English to German
 	https://huggingface.co/spaces/adlamtawea/space-for-flask-app/tree/main
 
 
+In app.py, update the MLflow server URL:
+	mlflow.set_tracking_uri()
+
+
 docker build -t image_name .
 docker run --name container_name -p 7860:7860 image_name
 
 
 curl -X POST https://c324e66dd827.ngrok-free.app/api -H "Content-Type: application/json" -d '{"user_input": "what time is it"}'
 	# Must replace the URL to the one ngrok gives you when you run this script.
+
+docker image ls
+docker ps -a
+docker image rm <>
+docker rm <>
 

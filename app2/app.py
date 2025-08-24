@@ -6,6 +6,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 from pyngrok import ngrok
 import os
+import mlflow
 
 # Open an ngrok tunnel to port web_port.
 web_port = int(os.environ.get("WEB_PORT"))
@@ -54,17 +55,30 @@ try:
 
     logger.info("Saving the model")
     os.system(f'ls -al .')
-    translator.save_pretrained(save_model_name)
+    # translator.save_pretrained(save_model_name)
+
+    mlflow.set_tracking_uri('https://f004bc311bc4.ngrok-free.app')
+    with mlflow.start_run() as run:
+        mlflow.transformers.log_model(
+            transformers_model=translator,
+            name="my_hf_model",
+            task="translation_en_to_de",
+            input_example="Hello world!"
+        )
+
+
+
     os.system(f'ls -al .')
     os.system(f'ls -al {save_model_name}')
 
+    '''
     translator = ''
-
     logger.info("Loading the model")
     tokenizer = T5Tokenizer.from_pretrained(save_model_name)
     model = T5ForConditionalGeneration.from_pretrained(save_model_name)
     translator = pipeline("translation_en_to_de", model=model, tokenizer=tokenizer)
     logger.info("Done loading the model")
+    '''
 
 
 except Exception as e:
