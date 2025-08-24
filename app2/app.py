@@ -12,7 +12,8 @@ import mlflow
 web_port = int(os.environ.get("WEB_PORT"))
 print(f'web_port: {web_port}')
 # authtoken = "31hJVxly22Ll452wEszMNTTfssf_y31L2BXNBpaPHrYAbGcp"
-authtoken = "31hYhuo5WYgo57T6dH7N716k1EE_2BJYnoWToy9mA9PB3MxcP"
+# authtoken = "31hYhuo5WYgo57T6dH7N716k1EE_2BJYnoWToy9mA9PB3MxcP"
+authtoken = '31ifYX2haFtkaDiUuvQK6PNyTns_4ma1WZn1mjPmnvrTgoMLq'
     # Sign up for a free account here: https://ngrok.com/signup
     # Create a AuthToken and assign the python variable authtoken above to this value.
 ngrok.set_auth_token(authtoken)
@@ -79,6 +80,15 @@ try:
     translator = pipeline("translation_en_to_de", model=model, tokenizer=tokenizer)
     logger.info("Done loading the model")
     '''
+
+    translator = ''
+    logger.info("Loading the model")
+    run_id = run.info.run_id
+    print("Run ID:", run_id)
+    model_uri = f'runs:/{run_id}/my_hf_model'
+    logger.info(f'model_uri: {model_uri}')
+    translator = mlflow.transformers.load_model(model_uri)
+    logger.info("Done loading the model")
 
 
 except Exception as e:

@@ -17,4 +17,8 @@ docker image ls
 docker ps -a
 docker image rm <>
 docker rm <>
+docker diff <file>
+docker add <file>
+docker commit -m <message>
+docker push
 

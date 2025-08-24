@@ -5,3 +5,4 @@ torch
 pyngrok
 sentencepiece
 mlflow
+torchvision
