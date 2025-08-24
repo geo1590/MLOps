@@ -5,3 +5,7 @@ English to German
 docker build -t image_name .
 docker run --name container_name -p 7860:7860 image_name
 
+
+curl -X POST https://c324e66dd827.ngrok-free.app/api -H "Content-Type: application/json" -d '{"user_input": "what time is it"}'
+	# Must replace the URL to the one ngrok gives you when you run this script.
+

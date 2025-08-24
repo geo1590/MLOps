@@ -32,7 +32,8 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-save_model_name = '/workspaces/MLOps/app2/saved_model'
+# save_model_name = '/workspaces/MLOps/app2/saved_model'
+save_model_name = './saved_model'
 
 # Global variables
 translator = None
@@ -52,9 +53,9 @@ try:
 
 
     logger.info("Saving the model")
-    os.system(f'ls -al /workspaces/MLOps/app2/')
+    os.system(f'ls -al .')
     translator.save_pretrained(save_model_name)
-    os.system(f'ls -al /workspaces/MLOps/app2/')
+    os.system(f'ls -al .')
     os.system(f'ls -al {save_model_name}')
 
     translator = ''
@@ -81,6 +82,9 @@ def translate_text(text):
         logger.error(f"Translation error: {str(e)}")
         return f"Translation failed: {str(e)}"
 
+'''
+This is needed for the HTML GUI page.
+'''
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:
@@ -94,6 +98,33 @@ def index():
     except Exception as e:
         logger.error(f"Route error: {str(e)}")
         return f"An error occurred: {str(e)}", 500
+
+
+'''
+This is for accessing via the curl command.
+Curl Example:
+    curl -X POST https://c324e66dd827.ngrok-free.app/api -H "Content-Type: application/json" -d '{"user_input": "what time is it"}'
+        # Must replace the URL to the one ngrok gives you when you run this script.
+'''
+@app.route('/api', methods=['GET', 'POST'])
+def api():
+    # logger.info(f'In /api')
+    try:
+        result = ""
+        if request.method == 'POST':
+            # logger.info("POST")
+            data = request.get_json(silent=True)
+            user_input = data.get('user_input', '') if data else ''
+            # logger.info(f'user_input: {user_input}')
+            if user_input:
+                result = translate_text(user_input)
+                # logger.info(f'result: {result}')
+        return {'results': result}
+
+    except Exception as e:
+        logger.error(f"Route error: {str(e)}")
+        return f"An error occurred: {str(e)}", 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
