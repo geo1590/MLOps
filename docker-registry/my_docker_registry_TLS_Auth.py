@@ -2,14 +2,6 @@
 
 
 '''
-PURPOSE
-==============
-This script will configure the Ubuntu Linux PC or VM with docker container registry.
-It uses the TLS HTTPS secure method.
-
-
-INSTRUCTIONS
-==============
 -- This script needs user to manually issue the below command and enter the sudo password
    before running this script. You only have to enter your sudo password once and subsequent
    calls to sudo will get this password from cache, but this cache has a expiry period.
@@ -17,13 +9,9 @@ INSTRUCTIONS
    Here is an example:
        % sudo pwd
 
--- Before running this script, must set in the shell the ngrok environment variableis. You 
-   can get this info from the ngrok.com site. Here are the commands.
-        % export NGROK_AUTHTOKEN=<the-ngrok-token>
-        % export NGROK_URL=<your-ngrok-public-url>
-		# For example:
-		#	export NGROK_AUTHTOKEN='6ilxu66bA6bA5XbBozzWA_qWHRDy2ufGQKkw_2EPe'
-		#       export NGROK_URL='candy-car-table.ngrok-free.app'
+-- Before running this script, must set the NGROK_URL environment variable (see below). 
+   Also, you must set the NGROK_AUTHTOKEN environment variable. You can get this info from 
+   the ngrok.com site.
 '''
 
 import subprocess
@@ -35,6 +23,9 @@ class cli_cmds():
     process = None
     g_param = {}
     g_param["ngrok_url"] = os.getenv('NGROK_URL')
+	# In the shell, use this command to set this variable. Use your own ngrok public URL.
+	#	export NGROK_URL=<your-ngrok-public-url>
+	#	export NGROK_URL=export NGROK_URL=candy-car-table.ngrok-free.app
 
     def __init__(self):
         if os.getenv('NGROK_URL') == None:
@@ -211,3 +202,8 @@ def do_install_docker_registry_basic_auth():
  
 ### ----------------------------------------
 do_install_docker_registry_basic_auth()
+
+# obj = cli_cmds()
+# obj.test_01()
+# obj.exit_session()
+
