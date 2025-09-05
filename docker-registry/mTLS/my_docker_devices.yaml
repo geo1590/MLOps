@@ -1,0 +1,39 @@
+# Credentials.
+#     Configure this based on your PC/VM username & password info.
+# NOTES
+#     -- If not specifying the devices dns, then use this default:
+#            dns: 'localhost'
+#
+# TO DO
+#     -- if 'dns:' in yaml is missing, than add this:
+#            dns: 'localhost'
+#     -- Check the dns name has valid characters the docker registry requires for the hostname/
+#        Docker registry hostnames must only use lowercase letters, digits, '-', and '.'.
+#        
+user_pass:
+  user1:ubuntu-AI:
+    host: 'ubuntu-AI'
+    dns: 'localhost'
+    user: 'user1'
+    password: 'abc123'
+  user2:ubuntu-AI:
+    host: 'ubuntu-AI'
+    dns: 'localhost'
+    user: 'user2'
+    password: 'abc123'
+  user1:west-vm1:
+    host: 'west-vm1.example.com'
+    dns: 'west-vm1.example.com'
+    user: 'user1'
+    password: 'abc123'
+  user1:west-vm2:
+    host: 'west-vm2.example.com'
+    dns: 'west-vm2.example.com'
+    user: 'user1'
+    password: 'abc123'
+  ubuntu:west-vm:
+    host: 'west-vm1.example.com'
+    dns: 'west-vm1.example.com'
+    user: 'ubuntu'
+    password: 'abc123'
+
