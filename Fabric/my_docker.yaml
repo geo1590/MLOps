@@ -1,0 +1,583 @@
+# NOTES
+#     -- You must use this format for variable substitution:
+#        ${my_client_path1}
+
+uninstall_docker_service:
+  - connection: u2
+    cmd:  'sudo systemctl stop docker'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo systemctl stop docker.socket'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo apt-get purge -y docker-engine docker docker.io docker-ce docker-ce-cli docker-ce-rootless-extras containerd.io docker-compose-plugin docker-buildx-plugin'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo apt-get autoremove -y --purge'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo apt-get autoclean'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo rm -rf /var/lib/docker'
+    cwd: '/tmp'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo rm -rf /var/lib/containerd'
+    cwd: '/tmp'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo rm -rf /etc/docker'
+    cwd: '/tmp'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo rm -rf /var/run/docker.sock'
+    cwd: '/tmp'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo rm -rf /var/run/docker'
+    cwd: '/tmp'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'rm -rf ~/.docker'
+    cwd: '/tmp'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo groupdel docker'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'docker --version || [ $? -eq 127 ]'
+
+
+install_docker_service:
+  - connection: u2
+    cmd: 'sudo apt remove docker docker-engine docker.io containerd runc'
+    responses: 
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo apt update ; sudo apt upgrade -y'
+    responses: 
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo apt update ; sudo apt upgrade -y'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo apt install apt-transport-https ca-certificates curl software-properties-common -y'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg'
+    responses: 
+      - sudo_response
+      - overwrite_response
+  - connection: u2
+    cmd: 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo apt update'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo apt install docker-ce docker-ce-cli containerd.io -y'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo systemctl start docker'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo systemctl enable docker'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'docker --version'
+  - connection: u2
+    cmd: 'sudo docker run hello-world'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo groupadd docker'
+    responses: 
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: 'sudo usermod -aG docker $USER'
+    responses: 
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: '(nohup newgrp docker ; exit ) &'
+    responses: 
+      - sudo_response
+  - connection: u2
+    cmd: 'sleep 20'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'docker run hello-world'
+    responses: 
+      - sudo_response
+    comments: 'Will test without using the "sudo" command'
+
+
+server_install_docker_registry:
+  - connection: u2
+    cmd: 'sudo groupadd docker'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+    # This is a comment.
+  - connection: u2
+    cmd: 'sudo usermod -aG docker $USER'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo rm -rf ${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo mkdir -p ${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo mkdir -p ${my_client_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo openssl genrsa -out ca.key 4096'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj "/C=US/ST=California/L=Oxnard/O=Personal/OU=OrgUnit/CN=IP:${u2["ip"]},DNS:${u2["dns"]}"'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo openssl genrsa -out server.key 4096'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo openssl req -new -key server.key -out server.csr -subj "/C=US/ST=California/L=Oxnard/O=Personal/OU=OrgUnit/CN=IP:${u2["ip"]},DNS:${u2["dns"]}"'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'DOCKER_IP=${u2["ip"]} ; DOCKER_DNS=${u2["dns"]} ; ${my_server_server_ext}'
+    cwd: '${my_server_dir}'
+  - connection: u2
+    cmd: 'sudo mv /tmp/server.ext .'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 365 -sha256 -extfile server.ext'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo chmod 644 ${my_server_dir}/*.crt'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo chmod 600 ${my_server_dir}/*.key'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo cp ca.key ca-unsecured.key'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sudo chmod oug+r ca-unsecured.key'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'echo "${my_server_config_yml}" | sudo tee config.yml > /dev/null'
+    cwd: '${my_server_dir}'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: "docker rm `docker ps -a | egrep registry: | awk '{print $1}'` --force"
+    cwd: '${my_server_dir}'
+    options: 'ignore-errors'
+  - connection: u2
+    cmd: '${my_server_docker_run}'
+    cwd: '${my_server_dir}'
+  - connection: u2
+    cmd: 'docker ps -a'
+  - connection: u2
+    cmd: 'sudo systemctl restart docker'
+    responses:
+      - sudo_response
+  - connection: u2
+    cmd: 'sleep 30'
+  - connection: u2
+    cmd: 'docker start ubuntu-client1'
+  - connection: u2
+    cmd: 'docker ps -a'
+  - connection: u2
+    cmd: 'docker logs registry'
+
+
+client_install_docker_registry:
+  - connection: u1
+    cmd:  'echo ${u2["ip"]} | egrep "[0-9]{1,3}([.][0-9]{1,3}){3}"'
+  - connection: u1
+    cmd: 'sudo groupadd docker'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u1
+    cmd: 'sudo usermod -aG docker $USER'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo mkdir -p ${my_client_path1}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo mkdir -p ${my_client_path2}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'whoami ; ls -al ~/.ssh/'
+  - connection: u1
+    cmd: 'sudo scp user1@${u2["host"]}:/registry/VM/server/ca.crt ${my_client_path1}/'
+    responses:
+      - sudo_response
+      - new_host_response
+  - connection: u1
+    cmd: 'sudo scp user1@${u2["host"]}:/registry/VM/server/ca-unsecured.key ${my_client_path1}'
+    responses:
+      - sudo_response
+      - new_host_response
+  - connection: u1
+    cmd: 'sudo mv ca-unsecured.key /tmp/ca.key'
+    cwd: '${my_client_path1}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo openssl genrsa -out client.key 4096'
+    cwd: '${my_client_path1}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo openssl req -newkey rsa:4096 -nodes -keyout client.key -out client.csr -subj "/CN=user1"'
+    cwd: '${my_client_path1}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo openssl x509 -req -in client.csr -CA ca.crt -CAkey /tmp/ca.key -CAcreateserial -out client.crt -days 365 -sha256'
+    cwd: '${my_client_path1}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo openssl x509 -req -in client.csr -CA ca.crt -CAkey /tmp/ca.key -CAcreateserial -out client.crt -days 365 -sha256'
+    cwd: '${my_client_path1}'
+    responses:
+      - sudo_response
+  - connection: u1
+    cmd: 'sudo rm client.cert'
+    cwd: '${my_client_path1}'
+    responses: 
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u1
+    cmd: 'sudo ln -s client.crt client.cert'
+    cwd: '${my_client_path1}'
+    responses: 
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u1
+    cmd: 'sudo cp ${my_client_path1}/* ${my_client_path2}'
+    responses:
+      - sudo_response
+    options: 'ignore-errors'
+  - connection: u1
+    cmd: 'ls -al ${my_client_path1}/'
+    options: 'ignore-errors'
+  - connection: u1
+    cmd: 'ls -al ${my_client_path2}/'
+    options: 'ignore-errors'
+
+
+client_test_docker_ip_install:
+  - connection: u1
+    cmd: 'echo ${u2["ip"]} | egrep "[0-9]{1,3}([.][0-9]{1,3}){3}"'
+  - connection: u1
+    cmd: 'docker logout'
+  - connection: u1
+    cmd: 'docker login ${u2["ip"]}:5000 -u user -p pass'
+  - connection: u1
+    cmd: 'docker image ls'
+  - connection: u1
+    cmd: 'docker pull ubuntu'
+  - connection: u1
+    cmd: 'docker tag ubuntu ${u2["ip"]}:5000/my-ubuntu-${my_rand_str1}'
+  - connection: u1
+    cmd: 'docker push ${u2["ip"]}:5000/my-ubuntu-${my_rand_str1}'
+  - connection: u1
+    cmd: 'docker image ls'
+
+client_test_docker_dns_install:
+  - connection: u1
+    cmd: 'echo ${u2["ip"]} | egrep "[0-9]{1,3}([.][0-9]{1,3}){3}"'
+  - connection: u1
+    cmd: 'docker logout'
+  - connection: u1
+    cmd: 'docker login ${u2["dns"]}:5000 -u user -p pass'
+  - connection: u1
+    cmd: 'docker image ls'
+  - connection: u1
+    cmd: 'docker pull ubuntu'
+  - connection: u1
+    cmd: 'docker tag ubuntu ${u2["dns"]}:5000/my-ubuntu-${my_rand_str2}'
+  - connection: u1
+    cmd: 'docker push ${u2["dns"]}:5000/my-ubuntu-${my_rand_str2}'
+  - connection: u1
+    cmd: 'docker image ls'
+  - connection: u1
+    cmd: 'pwd'
+  - connection: u1
+    cmd: 'cd /tmp'
+  - connection: u1
+    cmd: 'pwd'
+
+client_test_docker_dns_install_icmd:
+  - connection: u1
+    icmd: 'echo ${u2["ip"]} | egrep "[0-9]{1,3}([.][0-9]{1,3}){3}"'
+  - connection: u1
+    icmd: 'docker logout'
+  - connection: u1
+    icmd: 'docker login ${u2["dns"]}:5000 -u user -p pass'
+  - connection: u1
+    icmd: 'docker image ls'
+  - connection: u1
+    icmd: 'docker pull ubuntu'
+  - connection: u1
+    icmd: 'docker tag ubuntu ${u2["dns"]}:5000/my-ubuntu-${my_rand_str2}'
+  - connection: u1
+    icmd: 'docker push ${u2["dns"]}:5000/my-ubuntu-${my_rand_str2}'
+  - connection: u1
+    icmd: 'docker image ls'
+  - connection: u1
+    icmd: 'pwd'
+  - connection: u1
+    icmd: 'cd /tmp'
+  - connection: u1
+    icmd: 'pwd'
+  - connection: u1
+    icmd: 'hostname'
+  - connection: u2
+    icmd: 'hostname'
+
+client_docker_delete_all_images:
+  - connection: u1
+    cmd: "docker image ls | awk '{print $1}' | xargs -I{} docker image rm {}"
+    options: 'ignore-errors'
+  - connection: u1
+    cmd: "docker image ls"
+
+docker_container_01:
+  - connection: u1
+    icmd: 'ssh user1@localhost whoami ; hostname'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'docker exec -it -w /tmp ubuntu-client1 bash'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'export MY_VAR123=123'
+  - connection: u1
+    icmd: 'echo $MY_VAR123'
+  - connection: u1
+    icmd: 'pwd'
+    cwd: '/home/user1'
+  - connection: u1
+    icmd: 'apt -y install iputils-ping'
+  - connection: u1
+    icmd: 'ls -al sdfsdrre'
+    options: 'ignore-errors'
+  - connection: u1
+    icmd: 'ping -c 10 8.8.8.8'
+  - connection: u1
+    icmd: 'apt -y autoremove'
+  - connection: u1
+    icmd: 'apt -y install python3'
+  - connection: u1
+    icmd: 'which python3'
+  - connection: u1
+    icmd: 'apt -y install python3-pip'
+  - connection: u1
+    icmd: 'which pip3'
+  - connection: u1
+    icmd: 'apt -y install python3-venv python3-dev build-essential'
+  - connection: u1
+    icmd: 'python3 --version'
+  - connection: u1
+    icmd: 'pip3 --version'
+  - connection: u1
+    icmd: 'apt -y update'
+  - connection: u1
+    icmd: 'apt -y install python3-virtualenv'
+  - connection: u1
+    icmd: 'which virtualenv'
+  - connection: u1
+    icmd: 'apt install -y vim'
+  - connection: u1
+    icmd: 'mkdir -p /home/$USER/georgeb/my_project1/'
+  - connection: u1
+    icmd: 'virtualenv /home/$USER/georgeb/my_project1/myenv'
+  - connection: u1
+    icmd: 'source /home/$USER/georgeb/my_project1/myenv/bin/activate'
+  - connection: u1
+    icmd: 'echo ABC123'
+  - connection: u1
+    icmd: 'which python3'
+  - connection: u1
+    icmd: 'python3 -c "print(\"abc\")"'
+  - connection: u1
+    icmd: 'pip install fabric'
+  - connection: u1
+    icmd: 'pip install pyyaml'
+
+# ------------------------------------------
+
+docker_container_test_response_01:
+  - connection: u1
+    icmd: 'docker exec -it -w /tmp ubuntu-client1 bash'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'source /home/user1/georgeb/my_project1/myenv/bin/activate'
+  - connection: u1
+    icmd: 'pwd'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'whoami ; hostname'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'cd /home/user1/georgeb/my_project1'
+  - connection: u1
+    icmd: 'pwd'
+  - connection: u1
+    icmd: '${my_server_server_ext}'
+  - connection: u1
+    icmd: '${my_docker_container_response_test_01}'
+  - connection: u1
+    icmd: 'chmod +x ${my_docker_container_response_test_filename1}'
+  - connection: u1
+    icmd: './${my_docker_container_response_test_filename1}'
+    responses:
+      - my_docker_test_response01
+
+
+# ------------------------------------------
+# Docker Container - Test 'Recipes'.
+docker_container_test_recipe_01:
+  - connection: u1
+    icmd: 'docker exec -it -w /tmp ubuntu-client1 bash'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'hostname'
+
+docker_container_test_recipe_02:
+  - connection: u1
+    icmd: 'docker exec -it -w /tmp ubuntu-client1 bash'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'whoami'
+
+docker_container_test_recipes:
+  recipes: 
+    - docker_container_test_recipe_01
+    - docker_container_test_recipe_02
+
+# ------------------------------------------
+
+docker_container_setup_01:
+#   - connection: u1
+#     icmd: 'ssh ${u1["user"]}@${u1["host"]}  whoami ; hostname'
+#     responses:
+#       - new_host_response
+  - connection: u1
+    icmd: 'docker exec -it -w /tmp ubuntu-client1 bash'
+    responses:
+      - new_host_response
+  - connection: u1
+    icmd: 'source /home/user1/georgeb/my_project1/myenv/bin/activate'
+  - connection: u1
+    icmd: 'cd /home/user1/georgeb/my_project1'
+  - connection: u1
+    icmd: 'ls -al afsdfsd'
+    options: 'ignore-errors'
+  - connection: u1
+    icmd: 'apt install -y vim iputils-ping'
+  - connection: u1
+    icmd: 'apt install -y python3-virtualenv python3-venv python3-dev build-essential'
+  - connection: u1
+    icmd: 'apt install -y python3 python3-pip'
+  - connection: u1
+    icmd: 'pip install numpy'
+  - connection: u1
+    icmd: 'pip install tensorflow'
+  - connection: u1
+    icmd: 'pip install jupyterlab'
+  - connection: u1
+    icmd: 'pip install pandas'
+  - connection: u1
+    icmd: 'pip install matplotlib'
+  - connection: u1
+    icmd: 'pip install tensorflow.keras'
+  - connection: u1
+    icmd: 'pip install scikit-learn'
+  - connection: u1
+    icmd: 'pip install tensorboard'
+  - connection: u1
+    icmd: 'pip install pydot'
+  - connection: u1
+    icmd: 'pip install graphviz'
+  - connection: u1
+    icmd: 'pip install keras-tuner'
+  - connection: u1
+    icmd: 'pip install fabric'
+  - connection: u1
+    icmd: 'pip install pyyaml'
+
