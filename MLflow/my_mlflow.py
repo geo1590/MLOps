@@ -2,73 +2,66 @@
 
 '''
 
-Install
-=================
-pip install mlflow
-pip install transformers
-pip install torch
-pip install sentencepiece
-pip install sacremoses
-pip install openai
-
-pip install datasets
-pip install "accelerate>=0.26.0"
-pip install "transformers[torch]" datasets
-pip install torchvision
-pip install docker
-
 '''
 
 
 '''
 my_mlflow.py.py --cmd container_rm --name
 my_mlflow.py.py --cmd container_rm --name mlflow_model_38592
+http://127.0.0.1:8000/container_rm/?name=mlflow_model_38592
 
 my_mlflow.py --cmd image_rm --name <name> --version <version>
 my_mlflow.py --cmd image_rm --name huggingface_model --version latest
+http://127.0.0.1:8000/image_rm/?name=mlflow_model_38592&version=latest
 
 my_mlflow.py --cmd save_model --name <name>
 my_mlflow.py --cmd save_model --name huggingface_model
+http://127.0.0.1:8000/save_model/?name=huggingface_model
 
-my_mlflow.py --cmd load_model --base_uri <> --name <name> 
+my_mlflow.py --cmd load_model --base_uri <> --name <name>
 my_mlflow.py --cmd load_model --base_uri 7b00661e141343ed9a437d7f43cfa94c --name huggingface_model
+http://127.0.0.1:8000/load_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
 
 my_mlflow.py --cmd register_model --base_uri <> --name <name> --base_uri <>
 my_mlflow.py --cmd register_model --base_uri 7b00661e141343ed9a437d7f43cfa94c --name huggingface_model
+http://127.0.0.1:8000/register_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
 
 my_mlflow.py --cmd build_docker_image --name <name> --version <>
 my_mlflow.py --cmd build_docker_image --name huggingface_model
+http://127.0.0.1:8000/build_docker_image/?name=huggingface_model&version=latest
 
 my_mlflow.py --cmd run_docker_image --model_name <> --container_name <>
-my_mlflow.py --cmd  ./my_evaluate_model.py --cmd run_docker_image --model_name huggingface_model --container_name mlflow_model_38592
+my_mlflow.py --cmd run_docker_image --model_name huggingface_model --container_name mlflow_model_38592
+http://127.0.0.1:8000/run_docker_image/?model_name=huggingface_model&container_name=mlflow_model_38592
 
 my_mlflow.py --cmd stop_container --name <>
 my_mlflow.py --cmd stop_container --name mlflow_model_38592
+http://127.0.0.1:8000/stop_container/?name=mlflow_model_38592
 
 my_mlflow.py --cmd start_container --name <>
 my_mlflow.py --cmd start_container --name mlflow_model_38592
+http://127.0.0.1:8000/start_container/?name=mlflow_model_38592
 
-my_mlflow.py --cmd call_model_serve 
 my_mlflow.py --cmd call_model_serve
+my_mlflow.py --cmd call_model_serve
+http://127.0.0.1:8000/call_model_serve/
 
 my_mlflow.py --cmd cleanup --model_name <> --container_name <> --version <>
 my_mlflow.py --cmd cleanup --model_name huggingface_model --container_name mlflow_model_38592 --version latest
+http://127.0.0.1:8000/cleanup/?model_name=huggingface_model&container_name=mlflow_model_38592&version=latest
 
 my_mlflow.py --cmd evaluate_dataset
+http://127.0.0.1:8000/evaluate_dataset
 
 my_mlflow.py --cmd evaluate_function
+http://127.0.0.1:8000/evaluate_function
 '''
-
 
 from pprint import pprint
 import mlflow
 from datasets import load_dataset
 import pandas as pd
 import numpy as np
-from mlflow.models import infer_signature
-import mlflow.pyfunc
-import mlflow.models
-import mlflow.transformers
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, pipeline
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import docker
@@ -91,33 +84,33 @@ def script_args(cmd, name, version, base_uri, model_name, container_name):
     pass
     # click.echo(f"Hello, {name}!")
     if cmd == 'stop_container':
-        test_docker_stop(name)
+        docker_stop(name)
     elif cmd == 'start_container':
-        test_docker_start(name)
+        docker_start(name)
     elif cmd == 'call_model_serve':
-        test_call_model_serve()
+        call_model_serve()
     elif cmd == 'container_rm':
-        test_docker_rm(name)
+        docker_rm(name)
     elif cmd == 'image_rm':
-        test_docker_image_rm(name, image_version=version)
+        docker_image_rm(name, image_version=version)
     elif cmd == 'save_model':
-        model_base_uri, model_name = test_save_model(name)
+        model_base_uri, model_name = save_model(name)
         print(f'model_base_uri: {model_base_uri}')
         print(f'model_name: {model_name}')
     elif cmd == 'load_model':
-        test_load_model(base_uri, name)
+        load_model(base_uri, name)
     elif cmd == 'register_model':
-        test_register_model(base_uri, name)
+        register_model(base_uri, name)
     elif cmd == 'build_docker_image':
-        test_deploy_build_docker_image(name, version)
+        deploy_build_docker_image(name, version)
     elif cmd == 'run_docker_image':
-        test_run_docker_image(model_name, container_name)
+        run_docker_image(model_name, container_name)
     elif cmd == 'cleanup':
-        test_cleanup(model_name, container_name, version)
+        cleanup(model_name, container_name, version)
     elif cmd == 'evaluate_dataset':
-        test_evaluate_dataset()
+        evaluate_dataset()
     elif cmd == 'evaluate_function':
-        test_evaluate_function()
+        evaluate_function()
     else:
         print(f'ERROR: Unknown --cmd')
         raise('ERROR')
@@ -170,7 +163,8 @@ def compute_metrics(pred):
     acc = accuracy_score(labels, preds)
     return {"accuracy": acc, "precision": precision, "recall": recall, "f1": f1}
 
-def test_save_model(model_name):
+def save_model(model_name):
+    out_dict = {}
     # Load dataset
     dataset = load_dataset("imdb")
     train_dataset = dataset["train"].shuffle(seed=42).select(range(2000))  # smaller sample
@@ -186,8 +180,6 @@ def test_save_model(model_name):
     def tokenize(batch):
         return tokenizer(batch["text"], padding=True, truncation=True)
 
-
-    
     train_dataset = train_dataset.map(tokenize, batched=True)
     test_dataset = test_dataset.map(tokenize, batched=True)
     
@@ -204,7 +196,6 @@ def test_save_model(model_name):
         logging_dir="./logs",
         eval_strategy="epoch"  # works in recent versions
     )
-    
     
     # MLflow run
     with mlflow.start_run() as run:
@@ -246,11 +237,18 @@ def test_save_model(model_name):
         print(f'model_base_uri: {model_base_uri}')
         print(f'model_name: {model_name}')
         print(f'model_uri: {model_uri}')
-        return(model_base_uri, model_name)
+
+        out_dict['status'] = 0
+        out_dict['model_base_uri'] = model_base_uri
+        out_dict['model_name'] = model_name
+        return out_dict
     
     
 
-def test_load_model(model_base_uri, model_name):
+def load_model(model_base_uri, model_name):
+    out_dict = {}
+    out_dict['review_result'] = []
+
     model_uri = f"runs:/{model_base_uri}/{model_name}"
     print(f'model_uri: {model_uri}')
 
@@ -273,16 +271,32 @@ def test_load_model(model_base_uri, model_name):
             pos_or_neg = 'negative'
 
         score = row.score
-        print(f'Review: {review}, result: {pos_or_neg}, score: {score}')
+      
+        
+        t_str = f'Review: {review}, result: {pos_or_neg}, score: {score}' 
+        out_dict['review_result'].append(t_str) 
+        print(t_str)
 
-def test_register_model(model_base_uri, model_name):
+    out_dict['status'] = 0
+    return out_dict
+
+
+def register_model(model_base_uri, model_name):
+    out_dict = {}
     model_uri = f'runs:/{model_base_uri}/{model_name}'
     # print(f"model_uri: '{model_uri}'")
-    result = mlflow.register_model(model_uri=model_uri, name=model_name)
-    print(result)
+    out_dict['model_base_uri'] = model_base_uri
+    out_dict['model_name'] = model_name
+    results = mlflow.register_model(model_uri=model_uri, name=model_name)
+    out_dict['results'] = results
+    out_dict['status'] = 0
+    print('out_dict:')
+    pprint(out_dict)
+    return out_dict
 
-def test_deploy_build_docker_image(model_name, model_version='latest'):
-    mlflow.models.build_docker(
+def deploy_build_docker_image(model_name, model_version='latest'):
+    out_dict = {}
+    results = mlflow.models.build_docker(
         model_uri=f"models:/{model_name}/{model_version}",
         name=model_name,
         env_manager="conda",  # or "conda", "virtualenv", "local"
@@ -290,10 +304,16 @@ def test_deploy_build_docker_image(model_name, model_version='latest'):
         install_mlflow=True  # install MLflow in container
     )
 
+    out_dict['results'] = results
+    out_dict['status'] = 0
+    print(out_dict)
+    return out_dict
+
 '''
 This is equivalent to 'docker run'.
 '''    
-def test_run_docker_image(model_name, container_name):
+def run_docker_image(model_name, container_name):
+    out_dict = {}
     # Connect to Docker (default local socket)
     client = docker.from_env()
     
@@ -313,11 +333,16 @@ def test_run_docker_image(model_name, container_name):
     container = None
     client = None
 
+    out_dict['status'] = 0
+    print(out_dict)
+    return out_dict
+
 
 '''
 This is equivalent to 'docker stop'.
 '''
-def test_docker_start(name):
+def docker_start(name):
+    out_dict = {}
     # Initialize the Docker client
     client = docker.from_env()
 
@@ -325,18 +350,23 @@ def test_docker_start(name):
     try:
         container = client.containers.get(name)
     except:
-        pass
         print(f"Could not find the container name '{name}'.")
-        return
+        out_dict['status'] = 1
+        print(out_dict)
 
     # Start the container again (like `docker start <container>`)
     container.start()
+
+    out_dict['status'] = 0
+    print(out_dict)
+    return out_dict
 
  
 '''
 This is equivalent to 'docker stop'.
 ''' 
-def test_docker_stop(name):
+def docker_stop(name):
+    out_dict = {}
     # Initialize the Docker client
     client = docker.from_env()
     
@@ -344,18 +374,26 @@ def test_docker_stop(name):
     try:
         container = client.containers.get(name)
     except:
-        pass
         print(f"Could not find the container name '{name}'.")
-        return
+        out_dict['status'] = 1
+        print(out_dict)
+        return out_dict
     
     # Stop the container (like `docker stop <container>`)
     container.stop()
+
+    out_dict['status'] = 0
+    print(out_dict)
+    return out_dict
+
+
     
 
 '''
 This is equivalent to 'docker rm'.
 '''
-def test_docker_rm(name):
+def docker_rm(name):
+    out_dict = {}
     # Initialize the Docker client
     client = docker.from_env()
     
@@ -365,10 +403,14 @@ def test_docker_rm(name):
     except:
         pass
         print(f"Could not find the container name '{name}'.")
-        return
+        out_dict['status'] = 1
+        return out_dict
     
     # Remove the container
     container.remove(force=True)
+
+    out_dict['status'] = 0
+    return out_dict
 
 
 
@@ -376,7 +418,8 @@ def test_docker_rm(name):
 '''
 This is equivalent to 'docker image rm'.
 '''
-def test_docker_image_rm(image_name, image_version='latest'):
+def docker_image_rm(image_name, image_version='latest'):
+    out_dict = {}
     # Connect to Docker (default local socket)
     client = docker.from_env()
 
@@ -387,15 +430,20 @@ def test_docker_image_rm(image_name, image_version='latest'):
     except:
         pass
         print(f"Could not find the container name '{name}'.")
-        return
+        out_dict['status'] = 1
+        return out_dict
 
     if len(images) != 1:
         print(f"The images '{images}' should have 1 image only.")
-        return
+        out_dict['status'] = 1
+        return out_dict
 
     for img in images:
         print(f"Removing image: {img.tags}")
         client.images.remove(image=img.id)  # equivalent to docker image rm
+
+    out_dict['status'] = 0
+    return out_dict
 
 
 
@@ -406,7 +454,9 @@ Response Body: {"predictions": [{"label": "LABEL_1", "score": 0.9567124843597412
 LABEL_1: Positive
 LABEL_0: Negative
 '''
-def test_call_model_serve():
+def call_model_serve():
+    out_dict = {}
+
     url = "http://localhost:5100/invocations"
     data = {
         "inputs": [
@@ -420,22 +470,32 @@ def test_call_model_serve():
     print("Status Code:", response.status_code)
     print("Response Body:", response.text)
     t_dict = json.loads(response.text)
-
+    out_dict['response'] = t_dict
     t1 = t_dict['predictions']
+    t_list = []
+    for one_dict in t1:
+        if one_dict['label'] == 'LABEL_1':
+            one_dict['label'] = 'positive'
+        elif one_dict['label'] == 'LABEL_0':
+            one_dict['label'] = 'negative'
+
     if response.status_code == 200 and \
-       t1[0]['label'] == 'LABEL_1' and \
-       t1[1]['label'] == 'LABEL_0':
+       t1[0]['label'] == 'positive' and \
+       t1[1]['label'] == 'negative':
        print(f'Passed')
-       return 0
+       out_dict['status'] = 0
+       return out_dict
     else:
        print(f'Failed')
-       return 1
+       out_dict['status'] = 1
+       return out_dict
 
 
-def test_cleanup(model_name, container_name, version):
-   test_docker_rm(container_name)
+def cleanup(model_name, container_name, version):
+   docker_rm(container_name)
    print(f'-----------------------')
-   test_docker_image_rm(model_name, image_version=version)
+   docker_image_rm(model_name, image_version=version)
+   return {'status': 0}
 
 '''
 Given a dataset where the Y come from model training and predictions of X, both X and Y are stored in the dataset.
@@ -443,7 +503,7 @@ The dataset evaluation can take this dataset and produce metrics without consult
 model).
 '''
 
-def test_evaluate_dataset():
+def evaluate_dataset():
     global clf
 
     # ----------------------------
@@ -508,16 +568,24 @@ def test_evaluate_dataset():
             evaluators=["default"]
         )
 
+        out_dict = {}
+        out_dict['evaluation_metrics'] = {}
         print("\nEvaluation metrics:")
         for metric, value in results.metrics.items():
+            out_dict['evaluation_metrics'][metric] = f'{value}'
             print(f"{metric}: {value}")
 
         # Get run info using the active run
         active_run = mlflow.active_run()
-        print(f"\nRun UI: {mlflow.get_tracking_uri()}/#/experiments/{active_run.info.experiment_id}/runs/{active_run.info.run_id}")
+        run_ui = f'{mlflow.get_tracking_uri()}/#/experiments/{active_run.info.experiment_id}/runs/{active_run.info.run_id}'
+        out_dict['run_ui'] = run_ui
+        print(f"\nRun UI: {run_ui}")
+
+    out_dict['status'] = 0
+    return out_dict
 
 
-def test_evaluate_function():
+def evaluate_function():
     global clf
 
     # ----------------------------
@@ -563,34 +631,24 @@ def test_evaluate_function():
             evaluators=["default"]
         )
 
+        out_dict = {}
+        out_dict['evaluation_metrics'] = {}
         print("\nEvaluation metrics:")
         for metric, value in results.metrics.items():
+            out_dict['evaluation_metrics'][metric] = f'{value}'
             print(f"{metric}: {value}")
 
         # Get run info using the active run
         active_run = mlflow.active_run()
-        print(f"\nRun UI: {mlflow.get_tracking_uri()}/#/experiments/{active_run.info.experiment_id}/runs/{active_run.info.run_id}")
+        run_ui = f'{mlflow.get_tracking_uri()}/#/experiments/{active_run.info.experiment_id}/runs/{active_run.info.run_id}'
+        out_dict['run_ui'] = run_ui
+        print(f"\nRun UI: {run_ui}")
+
+    out_dict['status'] = 0
+    return out_dict
 
 
 # ------------------------------------------
-'''
-model_base_uri = 'ca1abda3b71f4eed8b9554c43d4502fb'
-model_name = 'huggingface_model'
-container_name = 'mlflow_model_38592'
-
-### test_docker_rm(container_name)
-### test_docker_image_rm(model_name, image_version='latest')
-### model_base_uri, model_name = test_save_model(model_name)
-### test_load_model(model_base_uri, model_name)
-### test_register_model(model_base_uri, model_name)
-### test_deploy_build_docker_image(model_name)
-### test_run_docker_image(model_name, container_name)
-### test_docker_stop(container_name)
-### test_docker_start(container_name)
-### test_call_model_serve()
-### test_cleanup(model_name, container_name, version):
-'''
-
 if __name__ == '__main__':
     script_args()
 
