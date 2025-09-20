@@ -51,10 +51,10 @@ my_mlflow.py --cmd cleanup --model_name huggingface_model --container_name mlflo
 http://127.0.0.1:8000/cleanup/?model_name=huggingface_model&container_name=mlflow_model_38592&version=latest
 
 my_mlflow.py --cmd evaluate_dataset
-http://127.0.0.1:8000/evaluate_dataset
+http://127.0.0.1:8000/evaluate_dataset/
 
 my_mlflow.py --cmd evaluate_function
-http://127.0.0.1:8000/evaluate_function
+http://127.0.0.1:8000/evaluate_function/
 '''
 
 from pprint import pprint
@@ -69,9 +69,9 @@ import requests
 import json
 import time
 import click
+import os
 
-mlflow.set_tracking_uri("http://0.0.0.0:5000")
-mlflow.set_experiment("my_test_experiment")
+from datetime import datetime, timezone
 
 @click.command()
 @click.option('--cmd', help='Command')
@@ -111,10 +111,22 @@ def script_args(cmd, name, version, base_uri, model_name, container_name):
         evaluate_dataset()
     elif cmd == 'evaluate_function':
         evaluate_function()
+    elif cmd == 'show_containers':
+        show_containers()
+    elif cmd == 'show_images':
+        show_images()
     else:
         print(f'ERROR: Unknown --cmd')
         raise('ERROR')
     
+def init():
+    # mlflow.set_tracking_uri("http://0.0.0.0:5000")
+    # mlflow.set_experiment("my_test_experiment")
+
+    mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
+    mlflow.set_experiment("my_test_experiment")
+
 
 # ----------------------------
 # Define predict function for MLflow
@@ -153,6 +165,29 @@ def predict_fn2(input_df):
     positive_threshold = 0.85
     return [1 if p['label'] == 'POSITIVE' and p['score'] > positive_threshold else 0 for p in preds]
 
+def human_elapsed(created_dt):
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    delta = now - created_dt
+    days = delta.days
+    seconds = delta.seconds
+    if days > 0:
+        return f"{days} day{'s' if days>1 else ''} ago"
+    hours = seconds // 3600
+    if hours > 0:
+        return f"{hours} hour{'s' if hours>1 else ''} ago"
+    minutes = (seconds % 3600) // 60
+    if minutes > 0:
+        return f"{minutes} minute{'s' if minutes>1 else ''} ago"
+    return f"{seconds} seconds ago"
+
+def human_size(num_bytes):
+    """Convert bytes to human-readable string like Docker CLI."""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if num_bytes < 1024.0 or unit == 'TB':
+            return f"{num_bytes:.1f} {unit}"
+        num_bytes /= 1024.0
+
 
 
 # Define metrics
@@ -162,6 +197,71 @@ def compute_metrics(pred):
     precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average="binary")
     acc = accuracy_score(labels, preds)
     return {"accuracy": acc, "precision": precision, "recall": recall, "f1": f1}
+
+def show_containers():
+    print(f'show_containers(): called')
+    # Create a client connected to the Docker daemon
+    client = docker.from_env()
+
+    # List all containers (running and stopped)
+    containers = client.containers.list(all=True)
+
+    # Print container info
+    text1 = 'Short ID'
+    text2 = 'Name'
+    text3 = 'Status'
+    border1 = '-'*len(text1)
+    border2 = '-'*len(text2)
+    border3 = '-'*len(text3)
+    t_all_str = f'{text1:25s} {text2:25s} {text3:20s}'
+    t_all_str += '\n' + f"{border1:25s} {border2:25s} {border3:20s}"
+    for container in containers:
+        # print(f'dir(): {dir(container)}')
+        t_str = f"{container.short_id:25s} {container.name:25s} {container.status:20s}"
+        # print(f't_str: {t_str}')
+        t_all_str += '\n' + t_str
+
+    print(f't_all_str:\n{t_all_str}')
+    t_dict = {'output': t_all_str}
+    return t_dict
+
+def show_images():
+    client = docker.from_env()
+
+    # List all images (like `docker image ls`)
+    images = client.images.list()
+
+    text1 = 'Image ID'
+    text2 = 'Repository:Version-Tag'
+    text3 = 'Created'
+    text4 = 'Size'
+    border1 = '-'*len(text1)
+    border2 = '-'*len(text2)
+    border3 = '-'*len(text3)
+    border4 = '-'*len(text4)
+    t_all_str = f'{text1:15s} {text2:70s} {text3:20s} {text4:25s}'
+    t_all_str += '\n' + f"{border1:15s} {border2:70s} {border3:20s} {border4:25s}"
+    for image in images:
+        # print(f'dir(): {dir(image)}')
+        print(f'image.tags: {image.tags}')
+        tags = image.tags or ["None:None"]
+        print(f'tags: {tags}')
+        image_id = image.short_id.replace('sha256:', '')
+        created_iso = image.attrs['Created']  # e.g. '2023-09-17T12:34:56.789Z'
+        created_dt = datetime.fromisoformat(created_iso.replace('Z', '+00:00'))
+        created_elapsed = human_elapsed(created_dt)
+        size_bytes = image.attrs['Size']   # or img['Size'] from low-level API
+        size_human = human_size(size_bytes)
+        t_str = f"{image_id:15s} {', '.join(tags):70s} {created_elapsed:20s} {size_human:20s}"
+        print(f't_str: {t_str}')
+        t_all_str += '\n' + t_str
+
+    print(f't_all_str:\n{t_all_str}')
+    t_dict = {'output': t_all_str}
+    return t_dict
+
+
+
 
 def save_model(model_name):
     out_dict = {}
@@ -440,7 +540,7 @@ def docker_image_rm(image_name, image_version='latest'):
 
     for img in images:
         print(f"Removing image: {img.tags}")
-        client.images.remove(image=img.id)  # equivalent to docker image rm
+        client.images.remove(image=img.id, force=True)  # equivalent to docker image rm
 
     out_dict['status'] = 0
     return out_dict
@@ -647,6 +747,8 @@ def evaluate_function():
     out_dict['status'] = 0
     return out_dict
 
+
+init()
 
 # ------------------------------------------
 if __name__ == '__main__':

@@ -1,0 +1,16 @@
+click==8.2.1
+datasets==4.0.0
+docker_py==1.10.6
+fastapi==0.116.2
+gradio==5.46.0
+mlflow==3.3.2
+mlflow_skinny==3.3.2
+mlflow_tracing==3.3.2
+numpy==2.3.3
+pandas==2.3.2
+Requests==2.32.5
+scikit_learn==1.7.2
+transformers==4.56.1
+uvicorn==0.35.0
+torch==2.8.0
+pycurl

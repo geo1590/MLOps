@@ -2,7 +2,7 @@
 
 '''
 # Run the Web Server.
-% uvicorn main:app --reload
+% uvicorn my_mlflow_fast_api:app --reload
 	# Make sure you have a script 'main.py' in the current directory.
 	# Open the http address displayed in a web browser.
 
@@ -11,6 +11,12 @@
 
 
 '''
+my_mlflow.py --cmd show_containers
+http://127.0.0.1:8000/show_containers
+
+my_mlflow.py --cmd show_images
+http://127.0.0.1:8000/show_images
+
 my_mlflow.py.py --cmd container_rm --name
 my_mlflow.py.py --cmd container_rm --name mlflow_model_38592
 http://127.0.0.1:8000/container_rm/?name=mlflow_model_38592
@@ -65,6 +71,7 @@ http://127.0.0.1:8000/evaluate_function
 from pprint import pprint
 from fastapi import FastAPI
 import json
+
 import my_mlflow
 
 
@@ -75,6 +82,19 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"message": "Welcome, this is my_mlflow.py!"}
+
+@app.get("/show_containers/")
+def do_show_containers():
+    print(f'my_mlflow_fast_api.py(): do_show_containers(): called')
+    results = my_mlflow.show_containers()
+    # results = json.dumps(results)
+    return results
+
+@app.get("/show_images/")
+def do_show_images():
+    print(f'my_mlflow_fast_api.py(): do_show_images(): called')
+    results = my_mlflow.show_images()
+    return results
 
 @app.get("/container_rm/")
 def do_container_rm(name: str):

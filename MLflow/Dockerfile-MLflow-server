@@ -1,0 +1,29 @@
+# 1. Use an official Python base image
+# FROM python:3.11-slim
+FROM python:3.12
+
+# 2. Set working directory inside the container
+WORKDIR /app
+
+# 3. Copy requirements.txt first to leverage Docker layer caching
+COPY requirements.txt .
+
+# 4. Install dependencies
+RUN apt-get update && apt-get install -y vim-tiny && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y iputils-ping iproute2
+RUN pip install mlflow psycopg2-binary
+RUN pip install --upgrade pip
+
+# 5. Copy the rest of your app files into the container
+# (adjust the pattern if you have subfolders or static files)
+
+# 6. Expose the port that Uvicorn will run on
+EXPOSE 5000
+
+ENV BACKEND_STORE_URI=postgresql://mlflow:mlflowpass@postgres-mlflow:5432/mlflowdb
+ENV ARTIFACT_ROOT=/mlflow/mlruns
+
+# 7. Run
+ENTRYPOINT ["mlflow", "server", "--backend-store-uri", "$BACKEND_STORE_URI", \
+            "--default-artifact-root", "$ARTIFACT_ROOT", "--host", "0.0.0.0"]

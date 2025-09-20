@@ -1,0 +1,102 @@
+version: '3.9'  # Specify the Compose file version
+
+services:
+  web:
+    container_name: web-mlflow-docker
+    build:
+      context: .                                            # Folder containing your Dockerfile
+      dockerfile: Dockerfile-web-MLflow-docker              # <-- specify the filename here
+    volumes:
+      - ./volume:/volume
+    working_dir: /app
+    ports:
+      - "8045:8045"
+    environment:
+      - NOTHING1=123
+    networks:
+      - my-mlflow-network
+    depends_on:
+      - my_fastapi_docker
+      - my_fastapi_mlflow
+      - my_mlflow_server
+      - my_postgres
+
+  my_fastapi_docker:
+    container_name: fastapi-docker
+    build:
+      context: .                                            # Folder containing your Dockerfile
+      dockerfile: Dockerfile-fastAPI-docker                 # <-- specify the filename here
+    volumes:
+      - ./volume:/volume
+    working_dir: /app
+    ports:
+      - "8020:8020"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    environment:
+      - NOTHING2=123
+    networks:
+      - my-mlflow-network
+
+  my_fastapi_mlflow:
+    container_name: fastapi-mlflow
+    build:
+      context: .                                            # Folder containing your Dockerfile
+      dockerfile: Dockerfile-fastAPI-MLflow                 # <-- specify the filename here
+    volumes:
+      - ./volume:/volume
+    working_dir: /app
+    ports:
+      - "8030:8030"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    environment:
+      - NOTHING2=123
+    networks:
+      - my-mlflow-network
+
+  my_mlflow_server:
+    container_name: mlflow-server
+    build:
+      context: .                                            # Folder containing your Dockerfile
+      dockerfile: Dockerfile-MLflow-server                  # <-- specify the filename here
+    volumes:
+      - ./volume:/volume
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    environment:
+      - NOTHING2=123
+    networks:
+      - my-mlflow-network
+
+  my_postgres:
+    container_name: postgres-mlflow
+    build:
+      context: .                                            # Folder containing your Dockerfile
+      dockerfile: Dockerfile-PostGres                       # <-- specify the filename here
+    volumes:
+      - ./volume:/volume
+    working_dir: /app
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volume:/volume
+    environment:
+      - NOTHING2=123
+      - POSTGRES_USER=mlflow
+      - POSTGRES_PASSWORD=mlflowpass
+      - POSTGRES_DB=mlflowdb
+    networks:
+      - my-mlflow-network
+
+networks:
+  my-mlflow-network:
+    driver: bridge                                         # This will create a new network.
+    name: my-mlflow-network                                # This is the name of the docker network.
+
