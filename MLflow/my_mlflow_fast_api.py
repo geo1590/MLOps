@@ -66,6 +66,12 @@ http://127.0.0.1:8000/evaluate_dataset
 
 my_mlflow.py --cmd evaluate_function
 http://127.0.0.1:8000/evaluate_function
+
+my_mlflow.py --cmd minio_save_dataset
+http://127.0.0.1:8000/minio_save_dataset
+
+my_mlflow.py --cmd minio_load_dataset
+http://127.0.0.1:8000/minio_load_dataset
 '''
 
 from pprint import pprint
@@ -112,7 +118,7 @@ def do_save_model(name: str):
     return results
 
 @app.get("/load_model/")
-def do_save_model(model_base_uri: str, name: str):
+def do_load_model(model_base_uri: str, name: str):
     results = my_mlflow.load_model(model_base_uri, name)
     return results
 
@@ -159,6 +165,16 @@ def get_data1():
 @app.get("/evaluate_dataset/")
 def get_data2():
     results = my_mlflow.evaluate_dataset()
+    return results
+
+@app.get("/minio_save_dataset/")
+def do_minio_save_dataset():
+    results = my_mlflow.minio_save_dataset()
+    return results
+
+@app.get("/minio_load_dataset/")
+def do_minio_load_dataset():
+    results = my_mlflow.minio_load_dataset()
     return results
 
 

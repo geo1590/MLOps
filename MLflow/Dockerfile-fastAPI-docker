@@ -11,6 +11,7 @@ COPY requirements.txt .
 RUN apt-get update && apt-get install -y vim-tiny curl && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get install -y iputils-ping iproute2
+RUN pip install minio
 RUN pip install --upgrade pip
 
 # Deep Clean: Remove All Docker SDK Traces
@@ -23,7 +24,6 @@ RUN pip list | grep docker
 # (adjust the pattern if you have subfolders or static files)
 COPY my_mlflow.py /app
 COPY my_mlflow_fast_api.py /app
-COPY my_mlflow_web.py /app
 
 # 6. Expose the port that Uvicorn will run on
 EXPOSE 8020

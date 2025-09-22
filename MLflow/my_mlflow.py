@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 '''
+TO DO:
 
 '''
 
@@ -55,11 +56,17 @@ http://127.0.0.1:8000/evaluate_dataset/
 
 my_mlflow.py --cmd evaluate_function
 http://127.0.0.1:8000/evaluate_function/
+
+my_mlflow.py --cmd minio_save_dataset
+http://127.0.0.1:8000/minio_save_dataset
+
+my_mlflow.py --cmd minio_load_dataset
+http://127.0.0.1:8000/minio_load_dataset
 '''
 
 from pprint import pprint
 import mlflow
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 import pandas as pd
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, pipeline
@@ -70,8 +77,12 @@ import json
 import time
 import click
 import os
-
 from datetime import datetime, timezone
+
+from minio import Minio
+from minio.error import S3Error
+import tempfile
+
 
 @click.command()
 @click.option('--cmd', help='Command')
@@ -115,17 +126,33 @@ def script_args(cmd, name, version, base_uri, model_name, container_name):
         show_containers()
     elif cmd == 'show_images':
         show_images()
+    elif cmd == 'minio_save_dataset':
+        minio_save_dataset()
+    elif cmd == 'minio_load_dataset':
+        minio_load_dataset()
     else:
         print(f'ERROR: Unknown --cmd')
         raise('ERROR')
     
 def init():
+    global minio_http
+    global minio_root_user
+    global minio_root_password
+
     # mlflow.set_tracking_uri("http://0.0.0.0:5000")
     # mlflow.set_experiment("my_test_experiment")
 
     mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
     mlflow.set_tracking_uri(mlflow_tracking_uri)
     mlflow.set_experiment("my_test_experiment")
+
+    minio_http = os.getenv("MINIO_HTTP", "localhost")
+    minio_root_user = os.getenv("MINIO_ROOT_USER", "minioadmin")
+    minio_root_password = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
+
+    print(f"minio_http: '{minio_http}'")
+    print(f"minio_root_user: '{minio_root_user}'")
+    print(f"minio_root_password: '{minio_root_password}'")
 
 
 # ----------------------------
@@ -746,6 +773,82 @@ def evaluate_function():
 
     out_dict['status'] = 0
     return out_dict
+
+
+def minio_save_dataset():
+    global minio_http
+    global minio_root_user
+    global minio_root_password
+
+    print(f'A100')
+    out_dict = {}
+
+    dataset = load_dataset("imdb", split="train")  # example dataset
+   
+    print(f'A110') 
+    tmp_file = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False)
+    dataset.to_parquet(tmp_file.name)
+
+    print(f'A120')
+    print(f"----------------- minio_http: '{minio_http}'")
+    print(f"----------------- minio_root_user: '{minio_root_user}'")
+    print(f"----------------- minio_root_password: '{minio_root_password}'")
+    client = Minio(
+        f"{minio_http}:9000",              # MinIO endpoint
+        access_key=f"{minio_root_user}",
+        secret_key=f"{minio_root_password}",
+        secure=False
+    )
+    
+    bucket_name = "huggingface-datasets"
+    object_name = "imdb/train.parquet"
+
+    print(f'A130')
+    if not client.bucket_exists(bucket_name):
+        client.make_bucket(bucket_name)
+  
+    print(f'A140') 
+    try:
+        client.fput_object(bucket_name, object_name, tmp_file.name)
+        print(f"Uploaded HuggingFace dataset to s3://{bucket_name}/{object_name}")
+    except S3Error as err:
+        print("Error occurred:", err)
+
+    print(f'A150')
+    out_dict['status'] = 0
+    return out_dict
+    
+
+def minio_load_dataset():
+    global minio_http
+    global minio_root_user
+    global minio_root_password
+
+    out_dict = {}
+
+    client = Minio(
+        f"{minio_http}:9000",              # MinIO endpoint
+        access_key=f"{minio_root_user}",
+        secret_key=f"{minio_root_password}",
+        secure=False
+    )
+
+    bucket_name = "huggingface-datasets"
+    object_name = "imdb/train.parquet"
+    
+    tmp_file = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False)
+    client.fget_object(bucket_name, object_name, tmp_file.name)
+    
+    dataset = Dataset.from_parquet(tmp_file.name)
+    
+    print(dataset)
+    print(dataset[0])  # example row
+    
+    out_dict['example_row'] = dataset[0]
+    out_dict['status'] = 0
+    return out_dict
+    
+
 
 
 init()

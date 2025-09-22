@@ -7,7 +7,7 @@ services:
       context: .                                            # Folder containing your Dockerfile
       dockerfile: Dockerfile-web-MLflow-docker              # <-- specify the filename here
     volumes:
-      - ./volume:/volume
+      - /volume:/volume
     working_dir: /app
     ports:
       - "8045:8045"
@@ -20,6 +20,7 @@ services:
       - my_fastapi_mlflow
       - my_mlflow_server
       - my_postgres
+      - my_minio_server
 
   my_fastapi_docker:
     container_name: fastapi-docker
@@ -27,7 +28,7 @@ services:
       context: .                                            # Folder containing your Dockerfile
       dockerfile: Dockerfile-fastAPI-docker                 # <-- specify the filename here
     volumes:
-      - ./volume:/volume
+      - /volume:/volume
     working_dir: /app
     ports:
       - "8020:8020"
@@ -45,7 +46,7 @@ services:
       context: .                                            # Folder containing your Dockerfile
       dockerfile: Dockerfile-fastAPI-MLflow                 # <-- specify the filename here
     volumes:
-      - ./volume:/volume
+      - /volume:/volume
     working_dir: /app
     ports:
       - "8030:8030"
@@ -63,7 +64,7 @@ services:
       context: .                                            # Folder containing your Dockerfile
       dockerfile: Dockerfile-MLflow-server                  # <-- specify the filename here
     volumes:
-      - ./volume:/volume
+      - /volume:/volume
     working_dir: /app
     ports:
       - "5000:5000"
@@ -81,17 +82,34 @@ services:
       context: .                                            # Folder containing your Dockerfile
       dockerfile: Dockerfile-PostGres                       # <-- specify the filename here
     volumes:
-      - ./volume:/volume
+      - /volume:/volume
     working_dir: /app
     ports:
       - "5432:5432"
     volumes:
-      - ./volume:/volume
+      - /volume:/volume
     environment:
       - NOTHING2=123
       - POSTGRES_USER=mlflow
       - POSTGRES_PASSWORD=mlflowpass
       - POSTGRES_DB=mlflowdb
+    networks:
+      - my-mlflow-network
+
+  my_minio_server:
+    container_name: minio-server
+    build:
+      context: .                                            # Folder containing your Dockerfile
+      dockerfile: Dockerfile-minio-server                   # <-- specify the filename here
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_HTTP: minio
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - /minio-data:/data
     networks:
       - my-mlflow-network
 

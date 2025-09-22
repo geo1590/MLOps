@@ -24,6 +24,8 @@ labels_map = {
     'cleanup': [('model_name', ''), ('container_name', ''), ('version', 'latest')],
     'evaluate_function': [('None', ''), ('None', ''), ('None', '')],
     'evaluate_dataset': [('None', ''), ('None', ''), ('None', '')],
+    'minio_save_dataset': [('None', ''), ('None', ''), ('None', '')],
+    'minio_load_dataset': [('None', ''), ('None', ''), ('None', '')],
 }
 
 def call_url_for_dict(url):
@@ -133,6 +135,12 @@ def process(choice, input1, input2, input3):
         yield call_url_and_print_dict(url)
     elif choice == 'evaluate_function':
         url = f'{mlflow_functions}/evaluate_function'
+        yield call_url_and_print_dict(url)
+    elif choice == 'minio_save_dataset':
+        url = f'{mlflow_functions}/minio_save_dataset'
+        yield call_url_and_print_dict(url)
+    elif choice == 'minio_load_dataset':
+        url = f'{mlflow_functions}/minio_load_dataset'
         yield call_url_and_print_dict(url)
     else:
         yield "Invalid choice"
