@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y vim-tiny && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get install -y iputils-ping iproute2
 RUN pip install mlflow psycopg2-binary
+RUN pip install boto3
 RUN pip install --upgrade pip
 
 # 5. Copy the rest of your app files into the container
@@ -23,6 +24,12 @@ EXPOSE 5000
 
 ENV BACKEND_STORE_URI=postgresql://mlflow:mlflowpass@postgres-mlflow:5432/mlflowdb
 ENV ARTIFACT_ROOT=/mlflow/mlruns
+ENV DEFAULT-ARTIFACT-ROOT=s3://mlflow-artifacts
+
+ENV MLFLOW_S3_ENDPOINT_URL=http://minio-server:9000
+ENV AWS_ACCESS_KEY_ID=minioadmin
+ENV AWS_SECRET_ACCESS_KEY=minioadmin
+
 
 # 7. Run
 ENTRYPOINT ["mlflow", "server", "--backend-store-uri", "$BACKEND_STORE_URI", \

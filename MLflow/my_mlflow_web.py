@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 from pprint import pprint, pformat
 import gradio as gr
 import requests
@@ -24,18 +23,20 @@ labels_map = {
     'cleanup': [('model_name', ''), ('container_name', ''), ('version', 'latest')],
     'evaluate_function': [('None', ''), ('None', ''), ('None', '')],
     'evaluate_dataset': [('None', ''), ('None', ''), ('None', '')],
-    'minio_save_dataset': [('None', ''), ('None', ''), ('None', '')],
-    'minio_load_dataset': [('None', ''), ('None', ''), ('None', '')],
+    'save_dataset': [('None', ''), ('None', ''), ('None', '')],
+    'open_dataset': [('None', ''), ('None', ''), ('None', '')],
+    'minio_save_artifacts': [('experiment_name', ''), ('None', ''), ('None', '')],
+    'minio_load_artifacts': [('experiment_name', ''), ('None', ''), ('None', '')],
 }
 
 def call_url_for_dict(url):
     response = requests.get(url)   # Send GET request
-    print(f'response.content:')
+    # print(f'response.content:')
     pprint(response.content)
 
     t_content = response.content.decode()        # Raw bytes (good for images)
-    print(f'(1) type(t_content): {type(t_content)}')
-    print(f'(1) t_content:')
+    # print(f'(1) type(t_content): {type(t_content)}')
+    # print(f'(1) t_content:')
     pprint(t_content)
 
     t_str_dict = pformat(json.loads(t_content))
@@ -92,7 +93,7 @@ def process(choice, input1, input2, input3):
     if choice == 'show_containers':
         url = f'{docker_functions}/show_containers/'
         text = call_url_for_text_output(url)
-        print(f'text:\n{text}')
+        # print(f'text:\n{text}')
         yield text
     elif choice == 'show_images':
         url = f'{docker_functions}/show_images/'
@@ -136,12 +137,21 @@ def process(choice, input1, input2, input3):
     elif choice == 'evaluate_function':
         url = f'{mlflow_functions}/evaluate_function'
         yield call_url_and_print_dict(url)
-    elif choice == 'minio_save_dataset':
-        url = f'{mlflow_functions}/minio_save_dataset'
+    elif choice == 'save_dataset':
+        url = f'{mlflow_functions}/save_dataset'
         yield call_url_and_print_dict(url)
-    elif choice == 'minio_load_dataset':
-        url = f'{mlflow_functions}/minio_load_dataset'
+    elif choice == 'open_dataset':
+        url = f'{mlflow_functions}/open_dataset'
         yield call_url_and_print_dict(url)
+    elif choice == 'minio_save_artifacts':
+        url = f'{mlflow_functions}/minio_save_artifacts/?experiment_name={input1}'
+        # print(f"minio_save_artifacts: url: '{url}'")
+        yield call_url_and_print_dict(url)
+    elif choice == 'minio_load_artifacts':
+        url = f'{mlflow_functions}/minio_load_artifacts/?experiment_name={input1}'
+        # print(f"minio_load_artifacts: url: '{url}'")
+        yield call_url_and_print_dict(url)
+
     else:
         yield "Invalid choice"
 
@@ -150,7 +160,6 @@ def process(choice, input1, input2, input3):
 def main():
 
     with gr.Blocks() as demo:
-        # Markdown title at the very top:
         gr.Markdown("# MLflow & Docker Example")
 
         with gr.Row():
@@ -181,7 +190,8 @@ def main():
 
 
 # --------------------------------
-main()
+if __name__ == '__main__':
+    main()
 
 
 

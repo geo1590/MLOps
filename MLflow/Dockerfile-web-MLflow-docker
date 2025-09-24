@@ -25,6 +25,5 @@ ENV FASTAPI_MLFLOW=http://fastapi-mlflow:8030
 ENV FASTAPI_DOCKER=http://fastapi-docker:8020
 
 # 7. Run the FastAPI app with Uvicorn
-# Replace 'main:app' with your actual module and FastAPI instance name
 CMD ["./my_mlflow_web.py"]
 

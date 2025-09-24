@@ -5,100 +5,30 @@
 % uvicorn my_mlflow_fast_api:app --reload
 	# Make sure you have a script 'main.py' in the current directory.
 	# Open the http address displayed in a web browser.
-
-
 '''
 
-
-'''
-my_mlflow.py --cmd show_containers
-http://127.0.0.1:8000/show_containers
-
-my_mlflow.py --cmd show_images
-http://127.0.0.1:8000/show_images
-
-my_mlflow.py.py --cmd container_rm --name
-my_mlflow.py.py --cmd container_rm --name mlflow_model_38592
-http://127.0.0.1:8000/container_rm/?name=mlflow_model_38592
-
-my_mlflow.py --cmd image_rm --name <name> --version <version>
-my_mlflow.py --cmd image_rm --name huggingface_model --version latest
-http://127.0.0.1:8000/image_rm/?name=mlflow_model_38592&version=latest
-
-my_mlflow.py --cmd save_model --name <name>
-my_mlflow.py --cmd save_model --name huggingface_model
-http://127.0.0.1:8000/save_model/?name=huggingface_model
-
-my_mlflow.py --cmd load_model --base_uri <> --name <name> 
-my_mlflow.py --cmd load_model --base_uri 7b00661e141343ed9a437d7f43cfa94c --name huggingface_model
-http://127.0.0.1:8000/load_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
-
-my_mlflow.py --cmd register_model --base_uri <> --name <name> --base_uri <>
-my_mlflow.py --cmd register_model --base_uri 7b00661e141343ed9a437d7f43cfa94c --name huggingface_model
-http://127.0.0.1:8000/register_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
-
-my_mlflow.py --cmd build_docker_image --name <name> --version <>
-my_mlflow.py --cmd build_docker_image --name huggingface_model
-http://127.0.0.1:8000/build_docker_image/?name=huggingface_model&version=latest
-
-my_mlflow.py --cmd run_docker_image --model_name <> --container_name <>
-my_mlflow.py --cmd run_docker_image --model_name huggingface_model --container_name mlflow_model_38592
-http://127.0.0.1:8000/run_docker_image/?model_name=huggingface_model&container_name=mlflow_model_38592
-
-my_mlflow.py --cmd stop_container --name <>
-my_mlflow.py --cmd stop_container --name mlflow_model_38592
-http://127.0.0.1:8000/stop_container/?name=mlflow_model_38592
-
-my_mlflow.py --cmd start_container --name <>
-my_mlflow.py --cmd start_container --name mlflow_model_38592
-http://127.0.0.1:8000/start_container/?name=mlflow_model_38592
-
-my_mlflow.py --cmd call_model_serve 
-my_mlflow.py --cmd call_model_serve
-http://127.0.0.1:8000/call_model_serve/
-
-my_mlflow.py --cmd cleanup --model_name <> --container_name <> --version <>
-my_mlflow.py --cmd cleanup --model_name huggingface_model --container_name mlflow_model_38592 --version latest
-http://127.0.0.1:8000/cleanup/?model_name=huggingface_model&container_name=mlflow_model_38592&version=latest
-
-my_mlflow.py --cmd evaluate_dataset
-http://127.0.0.1:8000/evaluate_dataset
-
-my_mlflow.py --cmd evaluate_function
-http://127.0.0.1:8000/evaluate_function
-
-my_mlflow.py --cmd minio_save_dataset
-http://127.0.0.1:8000/minio_save_dataset
-
-my_mlflow.py --cmd minio_load_dataset
-http://127.0.0.1:8000/minio_load_dataset
-'''
 
 from pprint import pprint
 from fastapi import FastAPI
 import json
-
 import my_mlflow
 
-
-# Create FastAPI app
 app = FastAPI()
 
-# Root endpoint
 @app.get("/")
 def read_root():
     return {"message": "Welcome, this is my_mlflow.py!"}
 
 @app.get("/show_containers/")
 def do_show_containers():
-    print(f'my_mlflow_fast_api.py(): do_show_containers(): called')
+    # print(f'my_mlflow_fast_api.py(): do_show_containers(): called')
     results = my_mlflow.show_containers()
     # results = json.dumps(results)
     return results
 
 @app.get("/show_images/")
 def do_show_images():
-    print(f'my_mlflow_fast_api.py(): do_show_images(): called')
+    # print(f'my_mlflow_fast_api.py(): do_show_images(): called')
     results = my_mlflow.show_images()
     return results
 
@@ -167,19 +97,22 @@ def get_data2():
     results = my_mlflow.evaluate_dataset()
     return results
 
-@app.get("/minio_save_dataset/")
-def do_minio_save_dataset():
-    results = my_mlflow.minio_save_dataset()
+@app.get("/save_dataset/")
+def do_save_dataset():
+    results = my_mlflow.save_dataset()
     return results
 
-@app.get("/minio_load_dataset/")
-def do_minio_load_dataset():
-    results = my_mlflow.minio_load_dataset()
+@app.get("/open_dataset/")
+def do_open_dataset():
+    results = my_mlflow.open_dataset()
     return results
 
+@app.get("/minio_save_artifacts/")
+def do_minio_save_artifacts(experiment_name: str):
+    results = my_mlflow.minio_save_artifacts(experiment_name)
+    return results
 
-
-
-
-
-
+@app.get("/minio_load_artifacts/")
+def do_minio_load_artifacts(experiment_name: str):
+    results = my_mlflow.minio_load_artifacts(experiment_name)
+    return results

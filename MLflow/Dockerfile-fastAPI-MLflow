@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN apt-get update && apt-get install -y vim-tiny curl && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get install -y iputils-ping iproute2
-RUN pip install minio
+RUN pip install minio boto3
 RUN pip install --upgrade pip
 
 # 5. Copy the rest of your app files into the container
@@ -25,9 +25,7 @@ EXPOSE 8030
 ENV MLFLOW_TRACKING_URI=http://mlflow-server:5000
 ENV DOCKER_HOST=unix:///var/run/docker.sock
 
-# ENV MINIO_HTTP=minio
-# ENV MINIO_HTTP=localhost
-ENV MINIO_HTTP=minio-server
+ENV MINIO_HTTP=http://minio-server:9000
 ENV MINIO_ROOT_USER=minioadmin
 ENV MINIO_ROOT_PASSWORD=minioadmin
 

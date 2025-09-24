@@ -1,67 +1,67 @@
 #!/usr/bin/env python3
 
 '''
-TO DO:
-
-'''
-
-
-'''
 my_mlflow.py.py --cmd container_rm --name
 my_mlflow.py.py --cmd container_rm --name mlflow_model_38592
-http://127.0.0.1:8000/container_rm/?name=mlflow_model_38592
+http://127.0.0.1:8020/container_rm/?name=mlflow_model_38592
 
 my_mlflow.py --cmd image_rm --name <name> --version <version>
 my_mlflow.py --cmd image_rm --name huggingface_model --version latest
-http://127.0.0.1:8000/image_rm/?name=mlflow_model_38592&version=latest
+http://127.0.0.1:8020/image_rm/?name=mlflow_model_38592&version=latest
 
 my_mlflow.py --cmd save_model --name <name>
 my_mlflow.py --cmd save_model --name huggingface_model
-http://127.0.0.1:8000/save_model/?name=huggingface_model
+http://127.0.0.1:8030/save_model/?name=huggingface_model
 
 my_mlflow.py --cmd load_model --base_uri <> --name <name>
 my_mlflow.py --cmd load_model --base_uri 7b00661e141343ed9a437d7f43cfa94c --name huggingface_model
-http://127.0.0.1:8000/load_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
+http://127.0.0.1:8030/load_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
 
 my_mlflow.py --cmd register_model --base_uri <> --name <name> --base_uri <>
 my_mlflow.py --cmd register_model --base_uri 7b00661e141343ed9a437d7f43cfa94c --name huggingface_model
-http://127.0.0.1:8000/register_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
+http://127.0.0.1:8030/register_model/?name=huggingface_model&model_base_uri=7b00661e141343ed9a437d7f43cfa94c
 
 my_mlflow.py --cmd build_docker_image --name <name> --version <>
 my_mlflow.py --cmd build_docker_image --name huggingface_model
-http://127.0.0.1:8000/build_docker_image/?name=huggingface_model&version=latest
+http://127.0.0.1:8030/build_docker_image/?name=huggingface_model&version=latest
 
 my_mlflow.py --cmd run_docker_image --model_name <> --container_name <>
 my_mlflow.py --cmd run_docker_image --model_name huggingface_model --container_name mlflow_model_38592
-http://127.0.0.1:8000/run_docker_image/?model_name=huggingface_model&container_name=mlflow_model_38592
+http://127.0.0.1:8020/run_docker_image/?model_name=huggingface_model&container_name=mlflow_model_38592
 
 my_mlflow.py --cmd stop_container --name <>
 my_mlflow.py --cmd stop_container --name mlflow_model_38592
-http://127.0.0.1:8000/stop_container/?name=mlflow_model_38592
+http://127.0.0.1:8020/stop_container/?name=mlflow_model_38592
 
 my_mlflow.py --cmd start_container --name <>
 my_mlflow.py --cmd start_container --name mlflow_model_38592
-http://127.0.0.1:8000/start_container/?name=mlflow_model_38592
+http://127.0.0.1:8020/start_container/?name=mlflow_model_38592
 
 my_mlflow.py --cmd call_model_serve
 my_mlflow.py --cmd call_model_serve
-http://127.0.0.1:8000/call_model_serve/
+http://127.0.0.1:8030/call_model_serve/
 
 my_mlflow.py --cmd cleanup --model_name <> --container_name <> --version <>
 my_mlflow.py --cmd cleanup --model_name huggingface_model --container_name mlflow_model_38592 --version latest
-http://127.0.0.1:8000/cleanup/?model_name=huggingface_model&container_name=mlflow_model_38592&version=latest
+http://127.0.0.1:8020/cleanup/?model_name=huggingface_model&container_name=mlflow_model_38592&version=latest
 
 my_mlflow.py --cmd evaluate_dataset
-http://127.0.0.1:8000/evaluate_dataset/
+http://127.0.0.1:8030/evaluate_dataset/
 
 my_mlflow.py --cmd evaluate_function
-http://127.0.0.1:8000/evaluate_function/
+http://127.0.0.1:8030/evaluate_function/
 
-my_mlflow.py --cmd minio_save_dataset
-http://127.0.0.1:8000/minio_save_dataset
+my_mlflow.py --cmd save_dataset
+http://127.0.0.1:8030/save_dataset
 
-my_mlflow.py --cmd minio_load_dataset
-http://127.0.0.1:8000/minio_load_dataset
+my_mlflow.py --cmd open_dataset
+http://127.0.0.1:8030/open_dataset
+
+my_mlflow.py --cmd minio_save_artifacts --experiment_name experiment_1324
+http://127.0.0.1:8030/minio_save_artifacts/?experiment_name=experiment_1324
+
+my_mlflow.py --cmd minio_load_artifacts --experiment_name experiment_1324
+http://127.0.0.1:8030/minio_load_artifacts/?experiment_name=experiment_1324
 '''
 
 from pprint import pprint
@@ -77,12 +77,14 @@ import json
 import time
 import click
 import os
+import pickle
+import random
+import traceback
+import re
 from datetime import datetime, timezone
-
 from minio import Minio
 from minio.error import S3Error
 import tempfile
-
 
 @click.command()
 @click.option('--cmd', help='Command')
@@ -91,7 +93,8 @@ import tempfile
 @click.option('--base_uri', type=str, default='', help='base URI')
 @click.option('--model_name', type=str, default='', help='model name')
 @click.option('--container_name', type=str, default='', help='container name')
-def script_args(cmd, name, version, base_uri, model_name, container_name):
+@click.option('--experiment_name', type=str, default='', help='experiment name')
+def script_args(cmd, name, version, base_uri, model_name, container_name, experiment_name):
     pass
     # click.echo(f"Hello, {name}!")
     if cmd == 'stop_container':
@@ -106,8 +109,8 @@ def script_args(cmd, name, version, base_uri, model_name, container_name):
         docker_image_rm(name, image_version=version)
     elif cmd == 'save_model':
         model_base_uri, model_name = save_model(name)
-        print(f'model_base_uri: {model_base_uri}')
-        print(f'model_name: {model_name}')
+        # print(f'model_base_uri: {model_base_uri}')
+        # print(f'model_name: {model_name}')
     elif cmd == 'load_model':
         load_model(base_uri, name)
     elif cmd == 'register_model':
@@ -126,10 +129,14 @@ def script_args(cmd, name, version, base_uri, model_name, container_name):
         show_containers()
     elif cmd == 'show_images':
         show_images()
-    elif cmd == 'minio_save_dataset':
-        minio_save_dataset()
-    elif cmd == 'minio_load_dataset':
-        minio_load_dataset()
+    elif cmd == 'save_dataset':
+        save_dataset()
+    elif cmd == 'open_dataset':
+        open_dataset()
+    elif cmd == 'minio_save_artifacts':
+        minio_save_artifacts(experiment_name)
+    elif cmd == 'minio_load_artifacts':
+        minio_load_artifacts(experiment_name)
     else:
         print(f'ERROR: Unknown --cmd')
         raise('ERROR')
@@ -138,15 +145,17 @@ def init():
     global minio_http
     global minio_root_user
     global minio_root_password
-
-    # mlflow.set_tracking_uri("http://0.0.0.0:5000")
-    # mlflow.set_experiment("my_test_experiment")
+    global mlflow_tracking_uri
+    global mlflow_experiment_name
 
     mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
     mlflow.set_tracking_uri(mlflow_tracking_uri)
-    mlflow.set_experiment("my_test_experiment")
+    mlflow_experiment_name = 'my_test_experiment'
+    mlflow.set_experiment(mlflow_experiment_name)
 
-    minio_http = os.getenv("MINIO_HTTP", "localhost")
+    # minio_http = os.getenv("MINIO_HTTP", "http://127.0.0.1:9000")
+    minio_http = os.getenv("MINIO_HTTP", "http://localhost:9000")
+    minio_http = re.sub(r'https?://', '', minio_http)
     minio_root_user = os.getenv("MINIO_ROOT_USER", "minioadmin")
     minio_root_password = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
 
@@ -154,23 +163,16 @@ def init():
     print(f"minio_root_user: '{minio_root_user}'")
     print(f"minio_root_password: '{minio_root_password}'")
 
-
-# ----------------------------
-# Define predict function for MLflow
-# ----------------------------
 def predict_fn(input_df):
     global clf
 
     texts = input_df["text"].tolist()
     preds = clf(texts, truncation=True)
-    print(f'------------ ::predict_fn(): preds: {preds}')
+    # print(f'------------ ::predict_fn(): preds: {preds}')
     # return [1 if p["label"] == "LABEL_1" else 0 for p in preds]
     # 1: positive, 0: negative
     return [1 if p["label"] == "POSITIVE" else 0 for p in preds]
 
-# ----------------------------
-# Define MLflow Python model wrapper
-# ----------------------------
 class HFTextClassifier(mlflow.pyfunc.PythonModel):
     def __init__(self, pipeline_model):
         self.pipeline_model = pipeline_model
@@ -178,7 +180,7 @@ class HFTextClassifier(mlflow.pyfunc.PythonModel):
     def predict(self, context, model_input):
         texts = model_input["text"].tolist()
         preds = self.pipeline_model(texts, truncation=True)
-        print(f'------------ ::predict(): preds: {preds}')
+        # print(f'------------ ::predict(): preds: {preds}')
         # 1: positive, 0: negative
         return [1 if p["label"] == "POSITIVE" else 0 for p in preds]
 
@@ -187,13 +189,12 @@ def predict_fn2(input_df):
 
     texts = input_df["text"].tolist()
     preds = clf(texts, truncation=True)
-    print(f'------------ ::predict_fn(): preds: {preds}')
+    # print(f'------------ ::predict_fn(): preds: {preds}')
     # 1: positive, 0: negative
     positive_threshold = 0.85
     return [1 if p['label'] == 'POSITIVE' and p['score'] > positive_threshold else 0 for p in preds]
 
 def human_elapsed(created_dt):
-    from datetime import datetime, timezone
     now = datetime.now(timezone.utc)
     delta = now - created_dt
     days = delta.days
@@ -215,9 +216,6 @@ def human_size(num_bytes):
             return f"{num_bytes:.1f} {unit}"
         num_bytes /= 1024.0
 
-
-
-# Define metrics
 def compute_metrics(pred):
     labels = pred.label_ids
     preds = np.argmax(pred.predictions, axis=1)
@@ -226,14 +224,11 @@ def compute_metrics(pred):
     return {"accuracy": acc, "precision": precision, "recall": recall, "f1": f1}
 
 def show_containers():
-    print(f'show_containers(): called')
-    # Create a client connected to the Docker daemon
+    # print(f'show_containers(): called')
     client = docker.from_env()
 
-    # List all containers (running and stopped)
     containers = client.containers.list(all=True)
 
-    # Print container info
     text1 = 'Short ID'
     text2 = 'Name'
     text3 = 'Status'
@@ -248,14 +243,13 @@ def show_containers():
         # print(f't_str: {t_str}')
         t_all_str += '\n' + t_str
 
-    print(f't_all_str:\n{t_all_str}')
+    # print(f't_all_str:\n{t_all_str}')
     t_dict = {'output': t_all_str}
     return t_dict
 
 def show_images():
     client = docker.from_env()
 
-    # List all images (like `docker image ls`)
     images = client.images.list()
 
     text1 = 'Image ID'
@@ -270,9 +264,9 @@ def show_images():
     t_all_str += '\n' + f"{border1:15s} {border2:70s} {border3:20s} {border4:25s}"
     for image in images:
         # print(f'dir(): {dir(image)}')
-        print(f'image.tags: {image.tags}')
+        # print(f'image.tags: {image.tags}')
         tags = image.tags or ["None:None"]
-        print(f'tags: {tags}')
+        # print(f'tags: {tags}')
         image_id = image.short_id.replace('sha256:', '')
         created_iso = image.attrs['Created']  # e.g. '2023-09-17T12:34:56.789Z'
         created_dt = datetime.fromisoformat(created_iso.replace('Z', '+00:00'))
@@ -280,29 +274,23 @@ def show_images():
         size_bytes = image.attrs['Size']   # or img['Size'] from low-level API
         size_human = human_size(size_bytes)
         t_str = f"{image_id:15s} {', '.join(tags):70s} {created_elapsed:20s} {size_human:20s}"
-        print(f't_str: {t_str}')
+        # print(f't_str: {t_str}')
         t_all_str += '\n' + t_str
 
-    print(f't_all_str:\n{t_all_str}')
+    # print(f't_all_str:\n{t_all_str}')
     t_dict = {'output': t_all_str}
     return t_dict
 
-
-
-
 def save_model(model_name):
     out_dict = {}
-    # Load dataset
     dataset = load_dataset("imdb")
     train_dataset = dataset["train"].shuffle(seed=42).select(range(2000))  # smaller sample
     test_dataset = dataset["test"].shuffle(seed=42).select(range(500))
     
-    # Load tokenizer and model
     tokenizer_model_name = "distilbert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_name)
     model = AutoModelForSequenceClassification.from_pretrained(tokenizer_model_name, num_labels=2)
 
-    # Tokenize dataset
     # This must be defined after the 'tokenizer' variable has been defined.
     def tokenize(batch):
         return tokenizer(batch["text"], padding=True, truncation=True)
@@ -324,15 +312,11 @@ def save_model(model_name):
         eval_strategy="epoch"  # works in recent versions
     )
     
-    # MLflow run
     with mlflow.start_run() as run:
-    
-        # Log parameters
         mlflow.log_param("tokenizer_model_name", tokenizer_model_name)
         mlflow.log_param("num_train_epochs", 1)
         mlflow.log_param("train_batch_size", 8)
     
-        # Initialize Trainer
         trainer = Trainer(
             model=model,
             args=training_args,
@@ -341,18 +325,14 @@ def save_model(model_name):
             compute_metrics=compute_metrics,
         )
     
-        # Train model
         trainer.train()
     
-        # Evaluate model
         metrics = trainer.evaluate()
         for key, value in metrics.items():
             mlflow.log_metric(key, value)
     
-        # Create a pipeline with your trained model + tokenizer
         clf_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
     
-        # Save model
         mlflow.transformers.log_model(
             transformers_model=clf_pipeline,
             name=model_name, 
@@ -369,8 +349,6 @@ def save_model(model_name):
         out_dict['model_base_uri'] = model_base_uri
         out_dict['model_name'] = model_name
         return out_dict
-    
-    
 
 def load_model(model_base_uri, model_name):
     out_dict = {}
@@ -402,11 +380,10 @@ def load_model(model_base_uri, model_name):
         
         t_str = f'Review: {review}, result: {pos_or_neg}, score: {score}' 
         out_dict['review_result'].append(t_str) 
-        print(t_str)
+        # print(t_str)
 
     out_dict['status'] = 0
     return out_dict
-
 
 def register_model(model_base_uri, model_name):
     out_dict = {}
@@ -417,8 +394,8 @@ def register_model(model_base_uri, model_name):
     results = mlflow.register_model(model_uri=model_uri, name=model_name)
     out_dict['results'] = results
     out_dict['status'] = 0
-    print('out_dict:')
-    pprint(out_dict)
+    # print('out_dict:')
+    # pprint(out_dict)
     return out_dict
 
 def deploy_build_docker_image(model_name, model_version='latest'):
@@ -433,18 +410,13 @@ def deploy_build_docker_image(model_name, model_version='latest'):
 
     out_dict['results'] = results
     out_dict['status'] = 0
-    print(out_dict)
+    # print(out_dict)
     return out_dict
 
-'''
-This is equivalent to 'docker run'.
-'''    
 def run_docker_image(model_name, container_name):
     out_dict = {}
-    # Connect to Docker (default local socket)
     client = docker.from_env()
     
-    # List containers
     for container in client.containers.list(all=True):
         print(container.name, container.status)
 
@@ -461,70 +433,48 @@ def run_docker_image(model_name, container_name):
     client = None
 
     out_dict['status'] = 0
-    print(out_dict)
+    # print(out_dict)
     return out_dict
 
-
-'''
-This is equivalent to 'docker stop'.
-'''
 def docker_start(name):
     out_dict = {}
-    # Initialize the Docker client
     client = docker.from_env()
 
-    # Get a container by name or ID
     try:
         container = client.containers.get(name)
     except:
         print(f"Could not find the container name '{name}'.")
         out_dict['status'] = 1
-        print(out_dict)
+        # print(out_dict)
 
-    # Start the container again (like `docker start <container>`)
     container.start()
 
     out_dict['status'] = 0
-    print(out_dict)
+    # print(out_dict)
     return out_dict
 
- 
-'''
-This is equivalent to 'docker stop'.
-''' 
 def docker_stop(name):
     out_dict = {}
-    # Initialize the Docker client
     client = docker.from_env()
     
-    # Get a container by name or ID
     try:
         container = client.containers.get(name)
     except:
         print(f"Could not find the container name '{name}'.")
         out_dict['status'] = 1
-        print(out_dict)
+        # print(out_dict)
         return out_dict
     
-    # Stop the container (like `docker stop <container>`)
     container.stop()
 
     out_dict['status'] = 0
-    print(out_dict)
+    # print(out_dict)
     return out_dict
 
-
-    
-
-'''
-This is equivalent to 'docker rm'.
-'''
 def docker_rm(name):
     out_dict = {}
-    # Initialize the Docker client
     client = docker.from_env()
     
-    # Get a container by name or ID
     try:
         container = client.containers.get(name)
     except:
@@ -533,24 +483,15 @@ def docker_rm(name):
         out_dict['status'] = 1
         return out_dict
     
-    # Remove the container
     container.remove(force=True)
 
     out_dict['status'] = 0
     return out_dict
 
-
-
-
-'''
-This is equivalent to 'docker image rm'.
-'''
 def docker_image_rm(image_name, image_version='latest'):
     out_dict = {}
-    # Connect to Docker (default local socket)
     client = docker.from_env()
 
-    # Get a container by name or ID
     name = f'{image_name}:{image_version}'
     try:
         images = client.images.list(name=name)
@@ -572,15 +513,6 @@ def docker_image_rm(image_name, image_version='latest'):
     out_dict['status'] = 0
     return out_dict
 
-
-
-
-'''
-Status Code: 200
-Response Body: {"predictions": [{"label": "LABEL_1", "score": 0.9567124843597412}, {"label": "LABEL_0", "score": 0.9516234397888184}]}
-LABEL_1: Positive
-LABEL_0: Negative
-'''
 def call_model_serve():
     out_dict = {}
 
@@ -594,8 +526,8 @@ def call_model_serve():
     
     response = requests.post(url, json=data, headers={"Content-Type": "application/json"})
     
-    print("Status Code:", response.status_code)
-    print("Response Body:", response.text)
+    # print("Status Code:", response.status_code)
+    # print("Response Body:", response.text)
     t_dict = json.loads(response.text)
     out_dict['response'] = t_dict
     t1 = t_dict['predictions']
@@ -609,33 +541,23 @@ def call_model_serve():
     if response.status_code == 200 and \
        t1[0]['label'] == 'positive' and \
        t1[1]['label'] == 'negative':
-       print(f'Passed')
+       # print(f'Passed')
        out_dict['status'] = 0
        return out_dict
     else:
-       print(f'Failed')
+       # print(f'Failed')
        out_dict['status'] = 1
        return out_dict
 
-
 def cleanup(model_name, container_name, version):
    docker_rm(container_name)
-   print(f'-----------------------')
+   # print(f'-----------------------')
    docker_image_rm(model_name, image_version=version)
    return {'status': 0}
-
-'''
-Given a dataset where the Y come from model training and predictions of X, both X and Y are stored in the dataset.
-The dataset evaluation can take this dataset and produce metrics without consulting the model (e.g. predictions from
-model).
-'''
 
 def evaluate_dataset():
     global clf
 
-    # ----------------------------
-    # Load the IMDb dataset
-    # ----------------------------
     dataset = load_dataset("imdb", split="test")
 
     # Sample 100 positive and 100 negative examples
@@ -648,31 +570,18 @@ def evaluate_dataset():
 
     print("Label distribution:\n", df["label"].value_counts())
 
-    # ----------------------------
-    # Create Hugging Face pipeline
-    # ----------------------------
     clf = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
 
 
-    # Wrap pipeline in MLflow PyFunc model
     pyfunc_model = HFTextClassifier(clf)
 
-
-    # ----------------------------
-    # Start MLflow run and log dataset
-    # ----------------------------
     with mlflow.start_run():
-        # Log evaluation dataset
         eval_data = mlflow.data.from_pandas(df, name="imdb_eval_subset")
         mlflow.log_input(eval_data, context="evaluation")
 
-        t1=df.head()
-        print(t1)
+        # t1=df.head()
+        # print(t1)
 
-        # ----------------------------
-        # Log Params
-        # ----------------------------
-        # Log batch metadata
         mlflow.log_params(
             {
                 "batch_size": len(df),
@@ -683,10 +592,6 @@ def evaluate_dataset():
             }
         )
 
-
-        # ----------------------------
-        # Evaluate dataset
-        # ----------------------------
         results = mlflow.evaluate(
             model=predict_fn,
             data=df,
@@ -702,7 +607,6 @@ def evaluate_dataset():
             out_dict['evaluation_metrics'][metric] = f'{value}'
             print(f"{metric}: {value}")
 
-        # Get run info using the active run
         active_run = mlflow.active_run()
         run_ui = f'{mlflow.get_tracking_uri()}/#/experiments/{active_run.info.experiment_id}/runs/{active_run.info.run_id}'
         out_dict['run_ui'] = run_ui
@@ -711,13 +615,9 @@ def evaluate_dataset():
     out_dict['status'] = 0
     return out_dict
 
-
 def evaluate_function():
     global clf
 
-    # ----------------------------
-    # Load the IMDb dataset
-    # ----------------------------
     dataset = load_dataset("imdb", split="test")
 
     # Sample 100 positive and 100 negative examples
@@ -730,26 +630,15 @@ def evaluate_function():
 
     print("Label distribution:\n", df["label"].value_counts())
 
-    # ----------------------------
-    # Create Hugging Face pipeline
-    # ----------------------------
     clf = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
 
-
-    # ----------------------------
-    # Start MLflow run and log dataset
-    # ----------------------------
     with mlflow.start_run():
-        # Log evaluation dataset
         eval_data = mlflow.data.from_pandas(df, name="imdb_eval_subset")
         mlflow.log_input(eval_data, context="evaluation")
 
-        t1=df.head()
-        print(t1)
+        # t1=df.head()
+        # print(t1)
 
-        # ----------------------------
-        # Evaluate function
-        # ----------------------------
         results = mlflow.evaluate(
             model=predict_fn2,
             data=df,
@@ -765,7 +654,6 @@ def evaluate_function():
             out_dict['evaluation_metrics'][metric] = f'{value}'
             print(f"{metric}: {value}")
 
-        # Get run info using the active run
         active_run = mlflow.active_run()
         run_ui = f'{mlflow.get_tracking_uri()}/#/experiments/{active_run.info.experiment_id}/runs/{active_run.info.run_id}'
         out_dict['run_ui'] = run_ui
@@ -775,26 +663,23 @@ def evaluate_function():
     return out_dict
 
 
-def minio_save_dataset():
+def save_dataset():
     global minio_http
     global minio_root_user
     global minio_root_password
 
-    print(f'A100')
     out_dict = {}
 
     dataset = load_dataset("imdb", split="train")  # example dataset
    
-    print(f'A110') 
     tmp_file = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False)
     dataset.to_parquet(tmp_file.name)
 
-    print(f'A120')
-    print(f"----------------- minio_http: '{minio_http}'")
-    print(f"----------------- minio_root_user: '{minio_root_user}'")
-    print(f"----------------- minio_root_password: '{minio_root_password}'")
+    # print(f"----------------- minio_http: '{minio_http}'")
+    # print(f"----------------- minio_root_user: '{minio_root_user}'")
+    # print(f"----------------- minio_root_password: '{minio_root_password}'")
     client = Minio(
-        f"{minio_http}:9000",              # MinIO endpoint
+        minio_http,              # In the format: 'minio-server:9000'. Do NOT use 'http[s]://'.
         access_key=f"{minio_root_user}",
         secret_key=f"{minio_root_password}",
         secure=False
@@ -803,23 +688,23 @@ def minio_save_dataset():
     bucket_name = "huggingface-datasets"
     object_name = "imdb/train.parquet"
 
-    print(f'A130')
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
   
-    print(f'A140') 
     try:
         client.fput_object(bucket_name, object_name, tmp_file.name)
         print(f"Uploaded HuggingFace dataset to s3://{bucket_name}/{object_name}")
     except S3Error as err:
         print("Error occurred:", err)
 
-    print(f'A150')
     out_dict['status'] = 0
     return out_dict
     
-
-def minio_load_dataset():
+'''
+NOTES:
+    -- Do NOT rename to 'load_dataset' since there is already a library function with that same name.
+'''
+def open_dataset():
     global minio_http
     global minio_root_user
     global minio_root_password
@@ -827,7 +712,7 @@ def minio_load_dataset():
     out_dict = {}
 
     client = Minio(
-        f"{minio_http}:9000",              # MinIO endpoint
+        minio_http,              # In the format: 'minio-server:9000'. Do NOT use 'http[s]://'.
         access_key=f"{minio_root_user}",
         secret_key=f"{minio_root_password}",
         secure=False
@@ -841,15 +726,149 @@ def minio_load_dataset():
     
     dataset = Dataset.from_parquet(tmp_file.name)
     
-    print(dataset)
-    print(dataset[0])  # example row
+    # print(dataset)
+    # print(dataset[0])  # example row
     
     out_dict['example_row'] = dataset[0]
     out_dict['status'] = 0
     return out_dict
+
+def minio_save_artifacts(experiment_name):
+    out_dict = {}
+
+    try:
+        out_dict = minio_save_artifacts_function(experiment_name)
+    except:
+        print(f'Error calling minio_save_artifacts_function()')
+        traceback.print_exc()  # prints full traceback
+
+    if mlflow.active_run():
+        mlflow.end_run()
+        # print(f'(2) ----------------- mlflow.end_run()')
+
+    out_dict['status'] = 0
+    return out_dict
+
+def minio_save_artifacts_function(experiment_name):
+    global minio_http
+    global minio_root_user
+    global minio_root_password
+    global mlflow_tracking_uri
+    global mlflow_experiment_name
+
+    if mlflow.active_run():
+        mlflow.end_run()
+        # print(f'----------------- mlflow.end_run()')
+
+    os.environ["MLFLOW_S3_ENDPOINT_URL"] = f'http://{minio_http}'
+    os.environ["AWS_ACCESS_KEY_ID"] = minio_root_user
+    os.environ["AWS_SECRET_ACCESS_KEY"] = minio_root_password
+
+    print(f"mlflow_tracking_uri: '{mlflow_tracking_uri}'")
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     
+    artifact_bucket = "mlflow-artifacts"
+            # This bucket name must already exist.
+            # It must be set to 'mlflow-artifacts', which matches DEFAULT-ARTIFACT-ROOT environment variable.
 
+    try:
+        experiment_id = mlflow.create_experiment(
+            name=experiment_name,
+            artifact_location=f"s3://{artifact_bucket}/mlflow-artifacts/{experiment_name}"
+        )
+    except mlflow.exceptions.MlflowException:
+        experiment = mlflow.get_experiment_by_name(experiment_name)
+        experiment = mlflow.get_experiment_by_name(experiment_name)
+        print("Location in MinIO: ", experiment.artifact_location)
+        experiment_id = experiment.experiment_id
+    else:
+        experiment = mlflow.get_experiment_by_name(experiment_name)
+        print("Location in MinIO: ", experiment.artifact_location)
+           # If you see /app/??/, then delete the experiment manually via the MLflow UI or CLI and recreate it.
+           # Or create a new experiment with a different name and correct artifact location.
+    
+    with mlflow.start_run(experiment_id=experiment_id):
+        mlflow.log_param("learning_rate", 0.01)
+        mlflow.log_param("num_epochs", 5)
+    
+        mlflow.log_metric("accuracy", 0.92)
+        model = {"weights": []}
+        for i in range(0, 10):
+            number = random.randint(0, 254)
+            model['weights'].append(number)
 
+        model_path = "model.pkl"
+        with open(model_path, "wb") as f:
+            pickle.dump(model, f)
+    
+        mlflow.log_artifact(model_path)  # Uploads to MinIO
+        # print("Artifacts logged to MinIO successfully!")
+   
+        if mlflow.active_run():
+            mlflow.end_run()
+            # print(f'(2) ----------------- mlflow.end_run()')
+ 
+        return model
+    return {} 
+
+def minio_load_artifacts(experiment_name):
+    out_dict = {}
+
+    try:
+        out_dict = minio_load_artifacts_function(experiment_name)
+    except:
+        print(f'Error calling minio_load_artifacts_function()')
+        traceback.print_exc()  # prints full traceback
+
+    if mlflow.active_run():
+        mlflow.end_run()
+        # print(f'(2) ----------------- mlflow.end_run()')
+
+    out_dict['status'] = 0
+    return out_dict
+
+def minio_load_artifacts_function(experiment_name):
+    global minio_http
+    global minio_root_user
+    global minio_root_password
+    global mlflow_tracking_uri
+
+    os.environ["MLFLOW_S3_ENDPOINT_URL"] = f'http://{minio_http}'
+    os.environ["AWS_ACCESS_KEY_ID"] = minio_root_user
+    os.environ["AWS_SECRET_ACCESS_KEY"] = minio_root_password
+
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+    if experiment is None:
+        print(f"❌ Experiment '{experiment_name}' not found.")
+        return {}
+
+    print(f"Artifact location: {experiment.artifact_location}")
+    experiment_id = experiment.experiment_id
+
+    runs = mlflow.search_runs(experiment_ids=[experiment_id], order_by=["start_time DESC"], max_results=1)
+    if runs.empty:
+        print(f"❌ No runs found in experiment '{experiment_name}'.")
+        return {}
+
+    run_id = runs.iloc[0]["run_id"]
+    print(f"Latest run ID: {run_id}")
+
+    try:
+        local_path = mlflow.artifacts.download_artifacts(run_id=run_id, artifact_path="model.pkl")
+        print(f"Downloaded artifact to: {local_path}")
+
+        with open(local_path, "rb") as f:
+            model = pickle.load(f)
+
+        print(f"Model loaded: {model}")
+        return model
+
+    except Exception as e:
+        import traceback
+        print("Error downloading artifact:")
+        traceback.print_exc()
+        return {}
+    return {}
 
 init()
 
