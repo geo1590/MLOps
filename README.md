@@ -1,5 +1,4 @@
 # MLOps
-Project: MLflow framework<br>
 Author: George Barrinuevo<br>
 Date: 09/23/2025<br>
 
