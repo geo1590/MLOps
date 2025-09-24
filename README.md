@@ -48,7 +48,7 @@ MLflow is an open-source framework for managing AI/ML projects. Here are the tas
  This is a Web application that uses gradio for the UI. It allows accessing some of the functionality of MLflow and services connected to it via a user friendly web app.
 
 ## My Setup
-This implementation can be setup using 3 different methods. It can be set up using the 'docker run' command. It can also be set up using a Dockerfile method. And lastly, it can be set up using the docker-compose.yml file. All of these docker containers is intended to be run under the same host machine. But, can relocate some of them to another host machine. All of the files can be found in this repository.
+This implementation can be setup using 3 different methods. It can be set up using the 'docker run' command. It can also be set up using a Dockerfile method. And lastly, it can be set up using the docker-compose.yml file. All of these docker containers is intended to be run under the same host machine. But, can relocate some of them to another host machine. The easiest method is the docker-compose.yml version. The other methods is there for study and educational purposes. All of the files can be found in this repository.
 
  - Using 'docker run'
  Here is the procedure to set up this implementation using just the 'docker run' command.
