@@ -29,12 +29,12 @@ MLflow is an open-source framework for managing AI/ML projects. Here are the tas
 
 Here are some screenshots of the MLflow framework.<br>
 
-[Evaluate Dataset] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_evaluate_dataset.png)<br>
-[Evaluate Function] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_evaluate_function.png)<br>
-[MinIO Load Artifacts] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_minio_load_artifacts.png)<br>
-[Open Dataset] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_open_dataset.png)<br>
-[Docker Show Containers] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_show_containers.png)<br>
-[Docker Show Images] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_show_images.png)<br>
+[Evaluate Dataset](https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_evaluate_dataset.png)<br>
+[Evaluate Function](https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_evaluate_function.png)<br>
+[MinIO Load Artifacts](https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_minio_load_artifacts.png)<br>
+[Open Dataset](https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_open_dataset.png)<br>
+[Docker Show Containers](https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_show_containers.png)<br>
+[Docker Show Images](https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_show_images.png)<br>
 
 ## My Implementation
 
