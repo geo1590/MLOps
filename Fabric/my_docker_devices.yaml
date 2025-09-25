@@ -4,36 +4,31 @@
 #     -- If not specifying the devices dns, then use this default:
 #            dns: 'localhost'
 #
-# TO DO
-#     -- if 'dns:' in yaml is missing, than add this:
-#            dns: 'localhost'
-#     -- Check the dns name has valid characters the docker registry requires for the hostname/
-#        Docker registry hostnames must only use lowercase letters, digits, '-', and '.'.
 #        
 user_pass:
   user1:ubuntu-AI:
     host: 'ubuntu-AI'
     dns: 'localhost'
     user: 'user1'
-    password: 'eT8$tV!L'
+    password: 'Uke$Wt#L'
   user2:ubuntu-AI:
     host: 'ubuntu-AI'
     dns: 'localhost'
     user: 'user2'
-    password: 'eT8$tV!L'
-  user1:vm1:
-    host: 'vm1.my-urls.org'
-    dns: 'vm1.my-urls.org'
+    password: 'Uke$Wt#L'
+  user1:oracle-vm1:
+    host: 'oracle-vm1.my-own-site.org'
+    dns: 'oracle-vm1.my-own-site.org'
     user: 'user1'
-    password: 'eT8$tV!L'
-  user1:vm2:
-    host: 'vm2.my-urls.org'
-    dns: 'vm2.my-urls.org'
+    password: 'Uke$Wt#L'
+  user1:oracle-vm2:
+    host: 'oracle-vm2.my-own-site.org'
+    dns: 'oracle-vm2.my-own-site.org'
     user: 'user1'
-    password: 'eT8$tV!L'
-  ubuntu:vm:
-    host: 'vm1.my-urls.org'
-    dns: 'vm1.my-urls.org'
+    password: 'Uke$Wt#L'
+  ubuntu:oracle-vm:
+    host: 'oracle-vm1.my-own-site.org'
+    dns: 'oracle-vm1.my-own-site.org'
     user: 'ubuntu'
-    password: 'eT8$tV!L'
+    password: 'Uke$Wt#L'
 
