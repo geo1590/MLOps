@@ -221,29 +221,7 @@ my fastapi-docker Dockerfile setup
 
 File: Dockerfile-fastAPI-docker
 -----------------------
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-
-RUN apt-get update && apt-get install -y vim-tiny curl && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get update && apt-get install -y iputils-ping iproute2
-RUN pip install minio boto3
-RUN pip install --upgrade pip
-
-RUN pip uninstall docker docker-py docker-pycreds requests urllib3 -y
-RUN pip install docker==6.1.3 requests==2.31.0 urllib3==1.26.18
-RUN pip list | grep docker
-
-COPY my_mlflow.py /app
-COPY my_mlflow_fast_api.py /app
-
-EXPOSE 8020
-
-ENV MLFLOW_TRACKING_URI=http://mlflow-server:5000
-ENV DOCKER_HOST=unix:///var/run/docker.sock
-
-CMD ["uvicorn", "my_mlflow_fast_api:app", "--host", "0.0.0.0", "--port", "8020"]
+[Dockerfile-fastAPI-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-fastAPI-docker)<br>
 
 
 Build & Run from Dockerfile
@@ -265,31 +243,7 @@ my fastapi-mlflow Dockerfile setup
 
 File: Dockerfile-fastAPI-MLflow
 -----------------------
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-
-RUN apt-get update && apt-get install -y vim-tiny curl && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get update && apt-get install -y iputils-ping iproute2
-RUN pip install minio boto3
-RUN pip install --upgrade pip
-
-COPY my_mlflow.py /app
-COPY my_mlflow_fast_api.py /app
-
-EXPOSE 8030
-
-ENV MLFLOW_TRACKING_URI=http://mlflow-server:5000
-ENV DOCKER_HOST=unix:///var/run/docker.sock
-
-ENV MINIO_HTTP=http://minio-server:9000
-ENV MINIO_ROOT_USER=minioadmin
-ENV MINIO_ROOT_PASSWORD=minioadmin
-
-CMD ["uvicorn", "my_mlflow_fast_api:app", "--host", "0.0.0.0", "--port", "8030"]
+[Dockerfile-fastAPI-MLflow](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-fastAPI-MLflow)<br>
 
 
 Build & Run from Dockerfile
@@ -311,31 +265,7 @@ my mlflow-server Dockerfile setup
 
 File: Dockerfile-MLflow-server
 -----------------------
-FROM python:3.12
-
-WORKDIR /app
-
-COPY requirements.txt .
-
-RUN apt-get update && apt-get install -y vim-tiny && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get update && apt-get install -y iputils-ping iproute2
-RUN pip install mlflow psycopg2-binary
-RUN pip install boto3
-RUN pip install --upgrade pip
-
-EXPOSE 5000
-
-ENV BACKEND_STORE_URI=postgresql://mlflow:mlflowpass@postgres-mlflow:5432/mlflowdb
-ENV ARTIFACT_ROOT=/mlflow/mlruns
-ENV DEFAULT-ARTIFACT-ROOT=s3://mlflow-artifacts
-
-ENV MLFLOW_S3_ENDPOINT_URL=http://minio-server:9000
-ENV AWS_ACCESS_KEY_ID=minioadmin
-ENV AWS_SECRET_ACCESS_KEY=minioadmin
-
-ENTRYPOINT ["mlflow", "server", "--backend-store-uri", "$BACKEND_STORE_URI", \
-            "--default-artifact-root", "$ARTIFACT_ROOT", "--host", "0.0.0.0"]
+[Dockerfile-MLflow-server](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-MLflow-server)<br>
 			
 
 Build & Run from Dockerfile
@@ -357,25 +287,7 @@ my postgres-mlflow Dockerfile setup
 
 File: Dockerfile-web-MLflow-docker
 -----------------------
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-
-RUN apt-get update && apt-get install -y vim-tiny curl && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get update && apt-get install -y iputils-ping iproute2
-RUN pip install --upgrade pip
-
-COPY my_mlflow_web.py /app
-
-EXPOSE 8045
-
-ENV FASTAPI_MLFLOW=http://fastapi-mlflow:8030
-ENV FASTAPI_DOCKER=http://fastapi-docker:8020
-
-CMD ["./my_mlflow_web.py"]
+[Dockerfile-web-MLflow-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-web-MLflow-docker)<br>
 
 
 Build & Run from Dockerfile
@@ -395,25 +307,7 @@ my web-mlflow-docker Dockerfile setup
 
 File: Dockerfile-web-MLflow-docker
 -----------------------
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-
-RUN apt-get update && apt-get install -y vim-tiny curl && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get update && apt-get install -y iputils-ping iproute2
-RUN pip install --upgrade pip
-
-COPY my_mlflow_web.py /app
-
-EXPOSE 8045
-
-ENV FASTAPI_MLFLOW=http://fastapi-mlflow:8030
-ENV FASTAPI_DOCKER=http://fastapi-docker:8020
-
-CMD ["./my_mlflow_web.py"]
+[Dockerfile-web-MLflow-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-web-MLflow-docker)<br>
 
 
 Build & Run from Dockerfile
@@ -433,20 +327,7 @@ my minio_server Dockerfile setup
 
 File: Dockerfile-minio-server 
 -----------------------
-FROM alpine:latest
-
-ENV MINIO_ACCESS_KEY=minioadmin
-ENV MINIO_SECRET_KEY=minioadmin
-
-RUN apk add --no-cache wget ca-certificates && \
-    wget https://dl.min.io/server/minio/release/linux-amd64/minio -O /usr/local/bin/minio && \
-    chmod +x /usr/local/bin/minio
-
-RUN mkdir /data
-
-EXPOSE 9000 9001
-
-CMD ["minio", "server", "/data", "--address", ":9000", "--console-address", ":9001"]
+[Dockerfile-minio-server](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-minio-server)<br>
 
 
 Build & Run from Dockerfile
@@ -463,22 +344,8 @@ Build & Run from Dockerfile
 
 requirements.txt file
 ------------------------------------------------
-click==8.2.1
-datasets==4.0.0
-docker_py==1.10.6
-fastapi==0.116.2
-gradio==5.46.0
-mlflow==3.3.2
-mlflow_skinny==3.3.2
-mlflow_tracing==3.3.2
-numpy==2.3.3
-pandas==2.3.2
-Requests==2.32.5
-scikit_learn==1.7.2
-transformers==4.56.1
-uvicorn==0.35.0
-torch==2.8.0
-pycurl
+[requirements.txt](https://github.com/geo1590/MLOps/blob/main/MLflow/requirements.txt)<br>
+
 
 ```
 
@@ -489,125 +356,7 @@ my MLflow 'docker-compose' docker setup
 
 File: docker-compose.yml
 -----------------------
-version: '3.9'  # Specify the Compose file version
-
-services:
-  web:
-    container_name: web-mlflow-docker
-    build:
-      context: .                                            # Folder containing your Dockerfile
-      dockerfile: Dockerfile-web-MLflow-docker              # <-- specify the filename here
-    volumes:
-      - /volume:/volume
-    working_dir: /app
-    ports:
-      - "8045:8045"
-    environment:
-      - NOTHING1=123
-    networks:
-      - my-mlflow-network
-    depends_on:
-      - my_fastapi_docker
-      - my_fastapi_mlflow
-      - my_mlflow_server
-      - my_postgres
-      - my_minio_server
-
-  my_fastapi_docker:
-    container_name: fastapi-docker
-    build:
-      context: .                                            # Folder containing your Dockerfile
-      dockerfile: Dockerfile-fastAPI-docker                 # <-- specify the filename here
-    volumes:
-      - /volume:/volume
-    working_dir: /app
-    ports:
-      - "8020:8020"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
-    environment:
-      - NOTHING2=123
-    networks:
-      - my-mlflow-network
-
-  my_fastapi_mlflow:
-    container_name: fastapi-mlflow
-    build:
-      context: .                                            # Folder containing your Dockerfile
-      dockerfile: Dockerfile-fastAPI-MLflow                 # <-- specify the filename here
-    volumes:
-      - /volume:/volume
-    working_dir: /app
-    ports:
-      - "8030:8030"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
-    environment:
-      - NOTHING2=123
-    networks:
-      - my-mlflow-network
-
-  my_mlflow_server:
-    container_name: mlflow-server
-    build:
-      context: .                                            # Folder containing your Dockerfile
-      dockerfile: Dockerfile-MLflow-server                  # <-- specify the filename here
-    volumes:
-      - /volume:/volume
-    working_dir: /app
-    ports:
-      - "5000:5000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
-    environment:
-      - NOTHING2=123
-    networks:
-      - my-mlflow-network
-
-  my_postgres:
-    container_name: postgres-mlflow
-    build:
-      context: .                                            # Folder containing your Dockerfile
-      dockerfile: Dockerfile-PostGres                       # <-- specify the filename here
-    volumes:
-      - /volume:/volume
-    working_dir: /app
-    ports:
-      - "5432:5432"
-    volumes:
-      - /volume:/volume
-    environment:
-      - NOTHING2=123
-      - POSTGRES_USER=mlflow
-      - POSTGRES_PASSWORD=mlflowpass
-      - POSTGRES_DB=mlflowdb
-    networks:
-      - my-mlflow-network
-
-  my_minio_server:
-    container_name: minio-server
-    build:
-      context: .                                            # Folder containing your Dockerfile
-      dockerfile: Dockerfile-minio-server                   # <-- specify the filename here
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_HTTP: http://minio-server:9000
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - /minio-data:/data
-    networks:
-      - my-mlflow-network
-
-networks:
-  my-mlflow-network:
-    driver: bridge                                         # This will create a new network.
-    name: my-mlflow-network                                # This is the name of the docker network.
+[docker-compose.yml](https://github.com/geo1590/MLOps/blob/main/MLflow/docker-compose.yml)<br>
 	
 
 Build & Run from docker-compose.yml file
