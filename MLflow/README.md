@@ -285,20 +285,20 @@ Build & Run from Dockerfile
 my postgres-mlflow Dockerfile setup
 ------------------------------------------------
 
-File: Dockerfile-web-MLflow-docker
+File: Dockerfile-PostGres
 -----------------------
 [Dockerfile-web-MLflow-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-web-MLflow-docker)<br>
 
 
 Build & Run from Dockerfile
 -----------------------
-% docker build --no-cache -f Dockerfile-web-MLflow-docker -t web-mlflow-docker .
+% docker build --no-cache -f Dockerfile-PostGres -t postgres .
 
 % docker run -d \
-  --name web-mlflow-docker \
+  --name postgres \
   --network mlflow-network \
   -p 5432:5432 \
-  web-mlflow-docker
+  postgres
 
 
 
