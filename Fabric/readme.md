@@ -1,3 +1,8 @@
+﻿# Fabric & Paramiko
+Project: CLI commands framework<br>
+Author: George Barrinuevo<br>
+Date: 09/24/2025<br>
+
 # Python Fabric + Paramiko module for device configurations.
 These set of python files uses the Fabric and Paramiko python modules to configure devices like linux VMs via the CLI shell. This implementation adds a YAML file to specify the CLI command and device info organized as recipes (a set of CLI commands) to perform tasks like configure the Docker Container Registry, install Ubuntu or Python files, and etc. 
 
