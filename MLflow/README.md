@@ -25,9 +25,20 @@ MLflow is an open-source framework for managing AI/ML projects. Here are the tas
  - Deployments
  Can deploy models to different platforms (AWS SageMaker, Azure ML, or custom servers).
 
+## Screenshots
+
+Here are some screenshots of the MLflow framework.<br>
+
+[Evaluate Dataset] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_evaluate_dataset.png)<br>
+[Evaluate Function] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_evaluate_function.png)<br>
+[MinIO Load Artifacts] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_minio_load_artifacts.png)<br>
+[Open Dataset] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_open_dataset.png)<br>
+[Docker Show Containers] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_show_containers.png)<br>
+[Docker Show Images] (https://github.com/geo1590/MLOps/blob/main/MLflow/screenshots/web_show_images.png)<br>
+
 ## My Implementation
 
- My implementation of MLflow is an example of how MLops can be developed and is meant for educational purposes. This implementation consists of several docker containers that talk to each other and provide the functionality where MLflow is the main framework. These are the docker containers that can run all inside one host machine.
+My implementation of MLflow is an example of how MLops can be developed and is meant for educational purposes. This implementation consists of several docker containers that talk to each other and provide the functionality where MLflow is the main framework. These are the docker containers that can run all inside one host machine.
  
 
  - MLflow Server
