@@ -1,6 +1,9 @@
 # Python Fabric + Paramiko module for device configurations.
 These set of python files uses the Fabric and Paramiko python modules to configure devices like linux VMs via the CLI shell. This implementation adds a YAML file to specify the CLI command and device info organized as recipes (a set of CLI commands) to perform tasks like configure the Docker Container Registry, install Ubuntu or Python files, and etc. 
 
+Screenshots:
+- [Install-Fabric](https://github.com/geo1590/MLOps/blob/main/Fabric/screenshots/install%20Fabric.png)
+
 Some of the example recipes I have included used for configuring and setting up services:
 - Install/Uninstall Docker Server
 - Install Docker Registry Server using mTLS security
