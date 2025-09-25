@@ -21,3 +21,8 @@ Here is a quick description of what the files do:
   - This is the custom library that will use the Fabric and Paramiko Python libraries.
 - my_docker_mTLS_run.py
   - This is the client script. Enable the recipe you want to run, then run this script.
+
+Some notes of the recipes:
+- If using 'icmd:', then this will keep the ssh connection in persistent mode so that it is using the same environment for the entire recipes. The 'cmd:' does NOT use persistant mode.
+- Can run one recipe that consists of multiple recipes.
+
