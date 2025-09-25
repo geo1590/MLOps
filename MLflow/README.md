@@ -60,7 +60,8 @@ Here are the files you will need:<br>
 [docker-compose.yml](https://github.com/geo1590/MLOps/blob/main/MLflow/docker-compose.yml)<br>
 [requirements.txt](https://github.com/geo1590/MLOps/blob/main/MLflow/requirements.txt)<br>
 
- - Using 'docker run'
+ - 'docker run' method
+---
  Here is the procedure to set up this implementation using just the 'docker run' command.
  ```bash
 
@@ -214,6 +215,7 @@ my fastapi-docker docker setup
 ```
 
  - Dockerfile method
+ ---
  This method uses the Dockerfile, one for each docker container.
  ```bash
 my fastapi-docker Dockerfile setup
@@ -350,6 +352,7 @@ See link to file in above link.
 ```
 
  - docker-compose.yml method
+ ---
  ```bash
 my MLflow 'docker-compose' docker setup
 ------------------------------------------------
