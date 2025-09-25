@@ -287,7 +287,7 @@ my postgres-mlflow Dockerfile setup
 
 File: Dockerfile-PostGres
 -----------------------
-[Dockerfile-web-MLflow-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-web-MLflow-docker)<br>
+[Dockerfile-PostGres](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-PostGres)<br>
 
 
 Build & Run from Dockerfile
