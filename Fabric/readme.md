@@ -23,6 +23,6 @@ Here is a quick description of what the files do:
   - This is the client script. Enable the recipe you want to run, then run this script.
 
 Some notes of the recipes:
-- If using 'icmd:', then this will keep the ssh connection in persistent mode so that it is using the same environment for the entire recipes. The 'cmd:' does NOT use persistant mode.
+- If using 'icmd:', then this will keep the ssh connection in persistent mode so that it is using the same environment for the entire recipes. And the stdout will display as it available line by line instead of displaying at the end of the command. The 'cmd:' does NOT use persistant mode.
 - Can run one recipe that consists of multiple recipes.
 
