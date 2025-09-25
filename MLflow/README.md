@@ -221,10 +221,7 @@ my fastapi-docker Dockerfile setup
 
 File: Dockerfile-fastAPI-docker
 -----------------------
-[link text](https://example.com)
-
-[Dockerfile-MLflow-server](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-MLflow-server)<br>
-File: [Dockerfile-fastAPI-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-fastAPI-docker)<br>
+See link to file in above link.
 
 
 Build & Run from Dockerfile
@@ -246,7 +243,7 @@ my fastapi-mlflow Dockerfile setup
 
 File: Dockerfile-fastAPI-MLflow
 -----------------------
-[Dockerfile-fastAPI-MLflow](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-fastAPI-MLflow)<br>
+See link to file in above link.
 
 
 Build & Run from Dockerfile
@@ -268,7 +265,7 @@ my mlflow-server Dockerfile setup
 
 File: Dockerfile-MLflow-server
 -----------------------
-[Dockerfile-MLflow-server](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-MLflow-server)<br>
+See link to file in above link.
 			
 
 Build & Run from Dockerfile
@@ -290,7 +287,7 @@ my postgres-mlflow Dockerfile setup
 
 File: Dockerfile-PostGres
 -----------------------
-[Dockerfile-PostGres](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-PostGres)<br>
+See link to file in above link.
 
 
 Build & Run from Dockerfile
@@ -310,7 +307,7 @@ my web-mlflow-docker Dockerfile setup
 
 File: Dockerfile-web-MLflow-docker
 -----------------------
-[Dockerfile-web-MLflow-docker](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-web-MLflow-docker)<br>
+See link to file in above link.
 
 
 Build & Run from Dockerfile
@@ -330,7 +327,7 @@ my minio_server Dockerfile setup
 
 File: Dockerfile-minio-server 
 -----------------------
-[Dockerfile-minio-server](https://github.com/geo1590/MLOps/blob/main/MLflow/Dockerfile-minio-server)<br>
+See link to file in above link.
 
 
 Build & Run from Dockerfile
@@ -347,7 +344,7 @@ Build & Run from Dockerfile
 
 requirements.txt file
 ------------------------------------------------
-[requirements.txt](https://github.com/geo1590/MLOps/blob/main/MLflow/requirements.txt)<br>
+See link to file in above link.
 
 
 ```
@@ -359,7 +356,7 @@ my MLflow 'docker-compose' docker setup
 
 File: docker-compose.yml
 -----------------------
-[docker-compose.yml](https://github.com/geo1590/MLOps/blob/main/MLflow/docker-compose.yml)<br>
+See link to file in above link.
 	
 
 Build & Run from docker-compose.yml file
